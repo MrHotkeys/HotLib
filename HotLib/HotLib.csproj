@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0D4581E9-AEF2-4165-85F8-CC5E03D2DFF8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HotLib</RootNamespace>
+    <AssemblyName>HotLib</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DotNetExtensions\AppDomainExtensions.cs" />
+    <Compile Include="DotNetExtensions\ArrayExtensions.cs" />
+    <Compile Include="DotNetExtensions\AssemblyNameExtensions.cs" />
+    <Compile Include="DotNetExtensions\CustomAttributeProviderExtensions.cs" />
+    <Compile Include="DotNetExtensions\DuplicatedIndicesException.cs" />
+    <Compile Include="DotNetExtensions\EnumExtensions.cs" />
+    <Compile Include="DotNetExtensions\LinqExtensions.cs" />
+    <Compile Include="DotNetExtensions\MemberInfoExtensions.cs" />
+    <Compile Include="DotNetExtensions\PropertyInfoExtensions.cs" />
+    <Compile Include="DotNetExtensions\QueueExtensions.cs" />
+    <Compile Include="DotNetExtensions\StringComparisonExtensions.cs" />
+    <Compile Include="DotNetExtensions\TypeExtensions.cs" />
+    <Compile Include="DotNetExtensions\ValidationExtensions.cs" />
+    <Compile Include="DotNetExtensions\XmlExtensions.cs" />
+    <Compile Include="Helpers\BitHelpers.cs" />
+    <Compile Include="Helpers\EnumHelpers.cs" />
+    <Compile Include="Helpers\XmlHelpers.cs" />
+    <Compile Include="Helpers\XmlNodeNameValidator.cs" />
+    <Compile Include="IPathComparer.cs" />
+    <Compile Include="OsSensitivePathComparer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
