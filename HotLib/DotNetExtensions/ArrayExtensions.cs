@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace HotLib.DotNetExtensions
 {
@@ -34,6 +35,47 @@ namespace HotLib.DotNetExtensions
                 throw new ArgumentNullException(nameof(array));
             for (var i = 0; i < array.Length; i++)
                 array.SetValue(value, i);
+        }
+
+        /// <summary>
+        /// Grows an array to a certain size across all its dimensions.
+        /// </summary>
+        /// <param name="source">The array to grow.</param>
+        /// <param name="dimensionSizes">The new dimension sizes. Array will grow to larger sizes, but will ignore smaller ones.</param>
+        /// <returns>A new array of the right size with all values from the original array copied over.</returns>
+        /// <remarks>Uses <see cref="Array"/> so that it can support multidimensional arrays.</remarks>
+        public static Array Resize(this Array source, int[] dimensionSizes)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+            if (dimensionSizes == null)
+                throw new ArgumentNullException(nameof(source));
+            if (source.Rank != dimensionSizes.Length)
+                throw new ArgumentException($"Incorrect number of dimension sizes (expected {source.Rank}, got {dimensionSizes.Length})!");
+            if (dimensionSizes.Any(s => s <= 0))
+                throw new ArgumentException("A dimension size cannot be non-positive!");
+            
+            var target = Array.CreateInstance(source.GetType().GetElementType(), dimensionSizes);
+            
+            var indices = new int[source.Rank];
+            CopyRecursivelyAtDimension(0);
+            
+            return target;
+
+            void CopyRecursivelyAtDimension(int dimension)
+            {
+                var indexMax = Math.Min(source.GetLength(dimension), dimensionSizes[dimension]);
+                for (var index = 0; index < indexMax; index++)
+                {
+                    indices[dimension] = index;
+
+                    if (index < source.GetLength(dimension))
+                        target.SetValue(source.GetValue(indices), indices);
+
+                    if (source.Rank - 1 > dimension)
+                        CopyRecursivelyAtDimension(dimension + 1);
+                }
+            }
         }
     }
 }
