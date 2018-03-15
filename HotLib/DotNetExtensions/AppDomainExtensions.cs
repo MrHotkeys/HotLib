@@ -7,19 +7,6 @@ namespace HotLib.DotNetExtensions
 {
     public static class AppDomainExtensions
     {
-        public class AssemblyNameComparer : IEqualityComparer<AssemblyName>
-        {
-            public static AssemblyNameComparer Instance { get; } = new AssemblyNameComparer();
-
-            private AssemblyNameComparer()
-            { }
-
-            public bool Equals(AssemblyName x, AssemblyName y) => string.Equals(x.FullName, y.FullName,
-                                                                                StringComparison.Ordinal);
-
-            public int GetHashCode(AssemblyName obj) => obj.FullName.GetHashCode();
-        }
-
         public static IEnumerable<Assembly> GetAssembliesAndReferenced(this AppDomain appDomain)
         {
             var queue = new Queue<Assembly>(appDomain.GetAssemblies());

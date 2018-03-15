@@ -36,6 +36,77 @@ namespace HotLib.DotNetExtensions
             return customAttributeProvider.GetCustomAttributes(typeof(T), inherit)
                                           .Any();
         }
+        /// <summary>
+        /// Checks whether or not the <see cref="ICustomAttributeProvider"/> has at least one attribute of the given type.
+        /// </summary>
+        /// <param name="customAttributeProvider">The <see cref="ICustomAttributeProvider"/> to check.</param>
+        /// <param name="attributeType">The type of attribute to check for.</param>
+        /// <returns>True if the <see cref="ICustomAttributeProvider"/> has the attribute, false if not.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="customAttributeProvider"/> or
+        ///     <paramref name="attributeType"/> is null.</exception>
+        public static bool HasCustomAttribute(this ICustomAttributeProvider customAttributeProvider, Type attributeType)
+        {
+            return customAttributeProvider.HasCustomAttribute(attributeType, true);
+        }
+
+        /// <summary>
+        /// Checks whether or not the <see cref="ICustomAttributeProvider"/> has at least one attribute of the given type.
+        /// </summary>
+        /// <param name="customAttributeProvider">The <see cref="ICustomAttributeProvider"/> to check.</param>
+        /// <param name="attributeType">The type of attribute to check for.</param>
+        /// <param name="inherit">When true, look up the hierarchy chain for the inherited custom attribute.</param>
+        /// <returns>True if the <see cref="ICustomAttributeProvider"/> has the attribute, false if not.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="customAttributeProvider"/> or
+        ///     <paramref name="attributeType"/> is null.</exception>
+        public static bool HasCustomAttribute(this ICustomAttributeProvider customAttributeProvider,
+                                              Type attributeType, bool inherit)
+        {
+            if (customAttributeProvider == null)
+                throw new ArgumentNullException(nameof(customAttributeProvider));
+            if (attributeType == null)
+                throw new ArgumentNullException(nameof(attributeType));
+
+            return customAttributeProvider.GetCustomAttributes(attributeType, inherit)
+                                          .Any();
+        }
+
+        /// <summary>
+        /// Tries to get the single custom attribute from the <see cref="ICustomAttributeProvider"/>.
+        /// </summary>
+        /// <param name="customAttributeProvider">The <see cref="ICustomAttributeProvider"/> to check.</param>
+        /// <param name="attributeType">The type of attribute to check for.</param>
+        /// <param name="attribute">The found attribute.</param>
+        /// <returns>True if there is a single matching attribute, false if there are zero matches or more than one.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="customAttributeProvider"/> or
+        ///     <paramref name="attributeType"/> is null.</exception>
+        public static bool TryGetCustomAttribute(this ICustomAttributeProvider customAttributeProvider,
+                                                 Type attributeType, out Attribute attribute)
+        {
+            return customAttributeProvider.TryGetCustomAttribute(attributeType, true, out attribute);
+        }
+
+        /// <summary>
+        /// Tries to get the single custom attribute from the <see cref="ICustomAttributeProvider"/>.
+        /// </summary>
+        /// <param name="customAttributeProvider">The <see cref="ICustomAttributeProvider"/> to check.</param>
+        /// <param name="attributeType">The type of attribute to check for.</param>
+        /// <param name="inherit">When true, look up the hierarchy chain for the inherited custom attribute.</param>
+        /// <param name="attribute">The found attribute.</param>
+        /// <returns>True if there is a single matching attribute, false if there are zero matches or more than one.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="customAttributeProvider"/> or
+        ///     <paramref name="attributeType"/> is null.</exception>
+        public static bool TryGetCustomAttribute(this ICustomAttributeProvider customAttributeProvider,
+                                                 Type attributeType, bool inherit, out Attribute attribute)
+        {
+            if (customAttributeProvider == null)
+                throw new ArgumentNullException(nameof(customAttributeProvider));
+            if (attributeType == null)
+                throw new ArgumentNullException(nameof(attributeType));
+
+            var matches = customAttributeProvider.GetCustomAttributes(attributeType, inherit);
+            attribute = (Attribute)matches.FirstOrDefault();
+            return matches.HasSingle();
+        }
 
         /// <summary>
         /// Tries to get the single custom attribute from the <see cref="ICustomAttributeProvider"/>.

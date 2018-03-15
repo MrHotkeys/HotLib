@@ -62,20 +62,6 @@ namespace HotLib.DotNetExtensions
         }
 
         /// <summary>
-        /// Checks whether or not the type is decorated with the at least one attribute of the given type.
-        /// </summary>
-        /// <typeparam name="T">The type of attribute to check for.</typeparam>
-        /// <param name="type">The type to check.</param>
-        /// <returns>True if the type has the attribute, false if not.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="type"/> is null.</exception>
-        public static bool HasCustomAttribute<T>(this Type type)
-        {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-            return type.GetCustomAttributes().OfType<T>().Any();
-        }
-
-        /// <summary>
         /// Gets whether the <see cref="Type"/> implements an interface or any interfaces that extend the interface.
         /// </summary>
         /// <typeparam name="InterfaceType">The type of interface to check for.</typeparam>
