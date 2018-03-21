@@ -16,6 +16,10 @@ namespace HotLib.Helpers
         [Serializable]
         public sealed class InvalidNameException : Exception
         {
+            /// <summary>
+            /// Instantiates a new <see cref="InvalidNameException"/>.
+            /// </summary>
+            /// <param name="message">The message to include with the exception.</param>
             public InvalidNameException(string message)
                 : base(message)
             { }

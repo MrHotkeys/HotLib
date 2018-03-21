@@ -3,6 +3,9 @@ using System.Xml;
 
 namespace HotLib.Helpers
 {
+    /// <summary>
+    /// Contains static helper methods for working with Xml.
+    /// </summary>
     public static class XmlHelpers
     {
         /// <summary>
