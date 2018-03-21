@@ -19,7 +19,7 @@ namespace HotLib
         /// <summary>
         /// Gets a singleton instance of <see cref="OsSensitivePathComparer"/>.
         /// </summary>
-        public OsSensitivePathComparer Instance { get; } = new OsSensitivePathComparer();
+        public static OsSensitivePathComparer Instance { get; } = new OsSensitivePathComparer();
 
         /// <summary>
         /// Instantiates a new <see cref="OsSensitivePathComparer"/>.
