@@ -28,7 +28,7 @@ namespace HotLib
         /// <summary>
         /// Gets if the collection of streams can be seeked in (false).
         /// </summary>
-        public override bool CanSeek { get { return false; } } // TODO: Implement seeking via Seek()
+        public override bool CanSeek { get { return false; } }
 
         /// <summary>
         /// Gets if the collection of streams can be written to (true).
@@ -42,7 +42,8 @@ namespace HotLib
         /// <exception cref="NotSupportedException">Getter is called.</exception>
         public override long Length
         {
-            get => throw new NotSupportedException("Length getter not supported for MultiDestinationStreams!");
+            get => throw new NotSupportedException($"{nameof(Length)} getter not supported " +
+                                                   $"for {nameof(MultiDestinationStream)}!");
         }
 
         /// <summary>
@@ -52,8 +53,10 @@ namespace HotLib
         /// <exception cref="NotSupportedException">Getter or setter are called.</exception>
         public override long Position
         {
-            get => throw new NotSupportedException("Position getter not supported for MultiDestinationStreams!");
-            set => throw new NotSupportedException("Position setter not supported for MultiDestinationStreams!");
+            get => throw new NotSupportedException($"{nameof(Position)} getter not supported " +
+                                                   $"for {nameof(MultiDestinationStream)}!");
+            set => throw new NotSupportedException($"{nameof(Position)} setter not supported " +
+                                                   $"for {nameof(MultiDestinationStream)}!");
         }
 
         /// <summary>
@@ -150,20 +153,29 @@ namespace HotLib
         /// Throws a <see cref="NotSupportedException"/>.
         /// </summary>
         /// <exception cref="NotSupportedException">Method is called.</exception>
-        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            throw new NotSupportedException($"{nameof(Seek)} not supported for {nameof(MultiDestinationStream)}!");
+        }
 
         /// <summary>
         /// Not supported, member streams may be written to but not otherwise transformed
         /// by the collection. Throws a <see cref="NotSupportedException"/>.
         /// </summary>
         /// <exception cref="NotSupportedException">Method is called.</exception>
-        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void SetLength(long value)
+        {
+            throw new NotSupportedException($"{nameof(SetLength)} not supported for {nameof(MultiDestinationStream)}!");
+        }
 
         /// <summary>
         /// Not supported, stream is write-only. Throws a <see cref="NotSupportedException"/>.
         /// </summary>
         /// <exception cref="NotSupportedException">Method is called.</exception>
-        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            throw new NotSupportedException($"{nameof(Read)} not supported for {nameof(MultiDestinationStream)}!");
+        }
 
         /// <summary>
         /// Disposes of the collection, disposing of each member stream.
