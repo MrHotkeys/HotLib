@@ -194,5 +194,75 @@ namespace HotLib.DotNetExtensions
             else
                 return members.Single();
         }
+
+        /// <summary>
+        /// Determines whether two <see cref="Type"/> objects represent the same type.
+        /// </summary>
+        /// <param name="type">The current <see cref="Type"/> to check with for equality.</param>
+        /// <param name="other">The other <see cref="Type"/> to check against for equality.</param>
+        /// <param name="comparisonMethod">The method to use when comparing two <see cref="Type"/> objects.</param>
+        /// <returns>True if the types are found to be equal, false if not.</returns>
+        /// <exception cref="ArgumentException"><paramref name="comparisonMethod"/> is
+        ///     not a valid value in <see cref="TypeComparison"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/> or <paramref name="other"/> is null.</exception>
+        public static bool Equals(this Type type, Type other, TypeComparison comparisonMethod)
+        {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+            if (other == null)
+                throw new ArgumentNullException(nameof(other));
+
+            switch (comparisonMethod)
+            {
+                case TypeComparison.Default:
+                    return type.Equals(other);
+                case TypeComparison.AssemblyQualifiedName:
+                    return string.Equals(type.AssemblyQualifiedName, other.AssemblyQualifiedName, StringComparison.Ordinal);
+                default:
+                    throw new ArgumentException($"Invalid {nameof(TypeComparison)} value \"{comparisonMethod}\"!");
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the current <see cref="Type"/> derives from the specified <see cref="Type"/>.
+        /// </summary>
+        /// <param name="type">The <see cref="Type"/> to check for being a subclass.</param>
+        /// <param name="other">The <see cref="Type"/> to check for being the superclass.</param>
+        /// <param name="comparisonMethod">The method to use when comparing two <see cref="Type"/> objects.</param>
+        /// <returns>True if the type is a subclass, false if not.</returns>
+        /// <exception cref="ArgumentException"><paramref name="comparisonMethod"/> is
+        ///     not a valid value in <see cref="TypeComparison"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/> or <paramref name="other"/> is null.</exception>
+        public static bool IsSubclassOf(this Type type, Type other, TypeComparison comparisonMethod)
+        {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+            if (other == null)
+                throw new ArgumentNullException(nameof(other));
+
+            switch (comparisonMethod)
+            {
+                case TypeComparison.Default:
+                    return type.IsSubclassOf(other);
+                case TypeComparison.AssemblyQualifiedName:
+                    {
+                        var current = type;
+                        while (current != null)
+                        {
+                            if (string.Equals(current.AssemblyQualifiedName, other.AssemblyQualifiedName, StringComparison.Ordinal))
+                                return true;
+
+                            if (current != typeof(object))
+                                current = current.BaseType;
+                            else
+                                break;
+                        }
+
+                        return false;
+                    }
+                default:
+                    throw new ArgumentException($"Invalid {nameof(TypeComparison)} value \"{comparisonMethod}\"!");
+            }
+        }
     }
 }
