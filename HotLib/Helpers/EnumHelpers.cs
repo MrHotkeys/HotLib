@@ -2,8 +2,6 @@
 
 using HotLib.DotNetExtensions;
 
-using static HotLib.Helpers.BitHelpers;
-
 namespace HotLib.Helpers
 {
     /// <summary>
@@ -21,21 +19,21 @@ namespace HotLib.Helpers
             switch (enumValue.GetTypeCode())
             {
                 case TypeCode.SByte:
-                    return HasOneBitSet(enumValue.Unbox<sbyte>());
+                    return BitHelpers.HasOneBitSet(enumValue.Unbox<sbyte>());
                 case TypeCode.Byte:
-                    return HasOneBitSet(enumValue.Unbox<byte>());
+                    return BitHelpers.HasOneBitSet(enumValue.Unbox<byte>());
                 case TypeCode.Int16:
-                    return HasOneBitSet(enumValue.Unbox<short>());
+                    return BitHelpers.HasOneBitSet(enumValue.Unbox<short>());
                 case TypeCode.UInt16:
-                    return HasOneBitSet(enumValue.Unbox<ushort>());
+                    return BitHelpers.HasOneBitSet(enumValue.Unbox<ushort>());
                 case TypeCode.Int32:
-                    return HasOneBitSet(enumValue.Unbox<int>());
+                    return BitHelpers.HasOneBitSet(enumValue.Unbox<int>());
                 case TypeCode.UInt32:
-                    return HasOneBitSet(enumValue.Unbox<uint>());
+                    return BitHelpers.HasOneBitSet(enumValue.Unbox<uint>());
                 case TypeCode.Int64:
-                    return HasOneBitSet(enumValue.Unbox<long>());
+                    return BitHelpers.HasOneBitSet(enumValue.Unbox<long>());
                 case TypeCode.UInt64:
-                    return HasOneBitSet(enumValue.Unbox<ulong>());
+                    return BitHelpers.HasOneBitSet(enumValue.Unbox<ulong>());
 
                 case TypeCode.Empty:
                 case TypeCode.Object:
