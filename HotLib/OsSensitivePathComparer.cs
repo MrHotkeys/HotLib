@@ -1,25 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace HotLib
 {
     /// <summary>
     /// An file path comparer which queries the running OS to determine the comparison method.
     /// </summary>
-    public sealed class OsSensitivePathComparer : IPathComparer, IEqualityComparer<string>
+    public class OsSensitivePathComparer : IPathComparer, IEqualityComparer<string>
     {
         /// <summary>
-        /// Gets the comparison method for paths.
+        /// Gets if the current operating system is case sensitive as determined by creating a
+        /// file with a lowercase name in the temp folder and then checking to see if it can be
+        /// found when its path is converted to uppercase.
         /// </summary>
-        private StringComparison PathComparison { get; }
+        public static bool IsOsCaseSensitive { get; } = GetOsFileSystemCaseSensitivity();
+        
+        /// <summary>
+        /// Gets a singleton instance of <see cref="OsSensitivePathComparer"/>.
+        /// </summary>
+        public OsSensitivePathComparer Instance { get; } = new OsSensitivePathComparer();
 
         /// <summary>
         /// Instantiates a new <see cref="OsSensitivePathComparer"/>.
         /// </summary>
-        public OsSensitivePathComparer()
-        {
-            PathComparison = GetPathComparison();
-        }
+        protected OsSensitivePathComparer()
+        { }
 
         /// <summary>
         /// Tests equality between the two paths, given the OS's path case sensitivity.
@@ -28,49 +34,50 @@ namespace HotLib
         /// <param name="pathB">The second path.</param>
         /// <returns>True if equal, false if not.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="pathA"/> or <paramref name="pathB"/> is null.</exception>
-        public bool Equals(string pathA, string pathB)
+        public virtual bool Equals(string pathA, string pathB)
         {
             if (pathA == null)
                 throw new ArgumentNullException(nameof(pathA));
             if (pathB == null)
                 throw new ArgumentNullException(nameof(pathB));
 
-            return string.Equals(pathA, pathB, PathComparison);
+            return string.Equals(pathA, pathB, IsOsCaseSensitive ?
+                                               StringComparison.CurrentCulture :
+                                               StringComparison.CurrentCultureIgnoreCase);
         }
 
         /// <summary>
-        /// Determines the string comparison method to use for paths on this system.
+        /// Gets if the current operating system's file system is case sensitive by creating a
+        /// file with a lowercase name in the temp folder and then checking to see if it can be
+        /// found when its path is converted to uppercase.
         /// </summary>
-        /// <returns>The proper string comparison method for the system.</returns>
-        private static StringComparison GetPathComparison()
+        /// <returns>True if case sensitive, false if not.</returns>
+        protected static bool GetOsFileSystemCaseSensitivity()
         {
-            switch (Environment.OSVersion.Platform)
+            string dir;
+            do
             {
-                case PlatformID.Win32NT:
-                case PlatformID.Win32S:
-                case PlatformID.Win32Windows:
-                case PlatformID.WinCE:
-                    return StringComparison.OrdinalIgnoreCase;
-                case PlatformID.Unix:
-                    return StringComparison.Ordinal;
-                case PlatformID.MacOSX: // Can be either way and requires more testing, unfortunately...
-                case PlatformID.Xbox:
-                default:
-                    throw new NotImplementedException();
+                dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             }
+            while (Directory.Exists(dir));
+
+            var tempFilePath = Path.Combine(dir, "abc");
+
+            Directory.CreateDirectory(dir);
+            File.Create(tempFilePath).Dispose(); // Immediately dispose so it can be deleted
+
+            var caseSensitive = !File.Exists(tempFilePath.ToUpper());
+
+            Directory.Delete(dir, true);
+
+            return caseSensitive;
         }
 
         /// <summary>
-        /// Gets a hashcode for the given path.
+        /// Gets a hash code for the given path.
         /// </summary>
         /// <param name="path">The path to hash.</param>
-        /// <returns>The hashcode.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
-        int IEqualityComparer<string>.GetHashCode(string path)
-        {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-            return path.GetHashCode();
-        }
+        /// <returns>The hash code.</returns>
+        public virtual int GetHashCode(string path) => EqualityComparer<string>.Default.GetHashCode(path);
     }
 }
