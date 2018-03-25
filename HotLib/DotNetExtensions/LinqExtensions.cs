@@ -54,8 +54,40 @@ namespace HotLib.DotNetExtensions
         {
             if (enumerable == null)
                 throw new ArgumentNullException(nameof(enumerable));
-            return enumerable.Any() && !enumerable.Skip(1).Any();
+
+            var enumerator = enumerable.GetEnumerator();
+            return enumerator.MoveNext() && !enumerator.MoveNext();
         }
+
+        /// <summary>
+        /// Tries to get the single element from the enumerable.
+        /// </summary>
+        /// <typeparam name="T">The type of the values in the enumerable.</typeparam>
+        /// <param name="enumerable">The enumerable to check.</param>
+        /// <param name="single">Will be set to the single item from the enumerable, or the default
+        ///     value for <typeparamref name="T"/> if no items or too many items.</param>
+        /// <returns>True if there is a single element, false if there are 0 or 2+ elements.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
+        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, out T single)
+        {
+            if (enumerable == null)
+                throw new ArgumentNullException(nameof(enumerable));
+
+            var enumerator = enumerable.GetEnumerator();
+            if (enumerator.MoveNext())
+            {
+                var first = enumerator.Current;
+                if (!enumerator.MoveNext())
+                {
+                    single = first;
+                    return true;
+                }
+            }
+
+            single = default;
+            return false;
+        }
+
         /// <summary>
         /// Filters out the first item in the enumerable that matches the predicate, and yield returns the rest, in order.
         /// If no match, simply all the items in the given enumerable will be yield returned.
