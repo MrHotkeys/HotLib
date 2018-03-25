@@ -1,7 +1,7 @@
 ﻿namespace HotLib.DotNetExtensions
 {
     /// <summary>
-    /// Different methods that can be used to compare <see cref="Type"/> objects.
+    /// Different methods that can be used to compare <see cref="System.Type"/> objects.
     /// </summary>
     public enum TypeComparison
     {
@@ -10,7 +10,7 @@
         /// </summary>
         Default,
         /// <summary>
-        /// The types are compared by the values of their <see cref="Type.AssemblyQualifiedName"/>.
+        /// The types are compared by the values of their <see cref="System.Type.AssemblyQualifiedName"/>.
         /// </summary>
         AssemblyQualifiedName,
     }

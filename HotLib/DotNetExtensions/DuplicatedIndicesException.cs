@@ -3,7 +3,7 @@
 namespace HotLib.DotNetExtensions
 {
     /// <summary>
-    /// The exception type thrown when <see cref="LinqExtensions.ToArray{T}(IEnumerable{T}, Func{T, int})"/> comes across a pair of items with the same index.
+    /// The exception type thrown when  comes across a pair of items with the same index.
     /// </summary>
     [Serializable]
     public sealed class DuplicatedIndicesException : Exception

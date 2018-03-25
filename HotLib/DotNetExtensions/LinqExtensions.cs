@@ -234,7 +234,7 @@ namespace HotLib.DotNetExtensions
         /// <param name="items">The enumerable of items to create an array from.</param>
         /// <param name="indexSelector">Retrieves the appropriate index for the given item.</param>
         /// <returns>An array of items from the enumerable.</returns>
-        /// <exception cref="DuplicatedIndicesException">The given index selector returned the same index for two or more items.</exception>
+        /// <exception cref="ArgumentException">The given index selector returned the same index for two or more items.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="items"/> or <paramref name="indexSelector"/> is null.</exception>
         public static T[] ToArray<T>(this IEnumerable<T> items, Func<T, int> indexSelector)
         {
@@ -273,9 +273,10 @@ namespace HotLib.DotNetExtensions
                     tuplesLeft = tuplesLeft.Skip(1);
 
                     if (last.index == current.index)
-                        throw new DuplicatedIndicesException(last, current, current.index);
-                    else
-                        last = current;
+                        throw new ArgumentException($"Given index selector assigned two or more items ({last}, {current}) " +
+                                                    $"with same index {current.index}!", nameof(indexSelector));
+
+                    last = current;
                 }
             }
 
