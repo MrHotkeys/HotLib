@@ -27,5 +27,24 @@ namespace HotLib.DotNetExtensions
                 return document;
             }
         }
+
+        /// <summary>
+        /// Tries to get an <see cref="XmlAttribute"/> by name.
+        /// </summary>
+        /// <param name="attributes">The collection of attributes to attempt to get the attribute from.</param>
+        /// <param name="name">The name of the attribute to retrieve.</param>
+        /// <param name="attribute">Will be set to the attribute if found, or null if not.</param>
+        /// <returns><see langword="true"/> if the attribute is found, <see langword="false"/> if not.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="attributes"/> or <paramref name="name"/> is null.</exception>
+        public static bool TryGetAttribute(this XmlAttributeCollection attributes, string name, out XmlAttribute attribute)
+        {
+            if (attributes == null)
+                throw new ArgumentNullException(nameof(attributes));
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            attribute = attributes[name];
+            return attribute != null;
+        }
     }
 }
