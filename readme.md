@@ -1,0 +1,1 @@
+A library for random code tidbits that don't deserve their own libraries.
