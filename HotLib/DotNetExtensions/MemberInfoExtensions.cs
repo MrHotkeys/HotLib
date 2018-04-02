@@ -74,6 +74,7 @@ namespace HotLib.DotNetExtensions
         /// If not, throws an <see cref="ArgumentException"/>.
         /// </summary>
         /// <param name="member">The member to check.</param>
+        /// <param name="target">The target object containing the member to check.</param>
         /// <returns>The value stored in the member.</returns>
         /// <exception cref="ArgumentException"><paramref name="member"/> is not a field or property.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="member"/> is null.</exception>

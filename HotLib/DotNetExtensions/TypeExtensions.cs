@@ -146,6 +146,12 @@ namespace HotLib.DotNetExtensions
             return type.GetConstructor(flags, null, Type.EmptyTypes, Array.Empty<ParameterModifier>()) != null;
         }
 
+        /// <summary>
+        /// Gets if the type is a value tuple type.
+        /// </summary>
+        /// <param name="type">The type to check.</param>
+        /// <returns>True if it is a value tuple type, false if not.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/> is null.</exception>
         public static bool IsValueTupleType(this Type type)
         {
             if (type == null)
@@ -167,6 +173,13 @@ namespace HotLib.DotNetExtensions
                    type == typeof(ValueTuple<,,,,,,,>);
         }
 
+        /// <summary>
+        /// Gets the type arguments to the given value tuple type. Supports value tuple types of all lengths.
+        /// </summary>
+        /// <param name="type">The type to check.</param>
+        /// <returns>An array containing all type arguments.</returns>
+        /// <exception cref="ArgumentException"><paramref name="type"/> is not a value tuple.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/> is null.</exception>
         public static Type[] GetValueTupleTypeArguments(this Type type)
         {
             if (type == null)
@@ -182,8 +195,22 @@ namespace HotLib.DotNetExtensions
             return types;
         }
         
+        /// <summary>
+        /// Gets the field or property with the given name. Searches all public and nonpublic instance members.
+        /// </summary>
+        /// <param name="type">The type to search through for the field or property.</param>
+        /// <param name="memberName">The name of the field or property being searched for.</param>
+        /// <returns>The found field or property.</returns>
+        /// <exception cref="ArgumentException">No field or property found. -or-
+        ///     Multiple fields and properties found with the given name.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/> or <paramref name="memberName"/> is null.</exception>
         public static MemberInfo GetFieldOrProperty(this Type type, string memberName)
         {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+            if (memberName == null)
+                throw new ArgumentNullException(nameof(memberName));
+
             const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             var members = type.GetMember(memberName, flags)
                               .Where(m => m.MemberType == MemberTypes.Field || m.MemberType == MemberTypes.Property);

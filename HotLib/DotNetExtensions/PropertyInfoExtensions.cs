@@ -23,14 +23,14 @@ namespace HotLib.DotNetExtensions
                    property.SetMethod?.IsStatic ??
                    throw new ArgumentException($"{property.DeclaringType}.{property} has no getter or setter!");
         }
-        
+
         /// <summary>
         /// Gets the value of a property using its getter, or by getting its backing field if it is an auto-property, if requested.
         /// </summary>
         /// <param name="property">The property to get the value of.</param>
         /// <param name="target">The target instance containing the property to get the value of.</param>
         /// <param name="useBackingFieldIfNoGetter">If true and the property has no getter, its backing field will be retrieved if it is an auto-property.</param>
-        /// <exception cref="ArgumentException"><paramref name="member"/> is a non-auto property with no getter.</exception>
+        /// <exception cref="ArgumentException"><paramref name="property"/> is a non-auto property with no getter.</exception>
         public static object GetValue(this PropertyInfo property, object target, bool useBackingFieldIfNoGetter)
         {
             var getter = property.GetGetMethod(true);
@@ -60,7 +60,7 @@ namespace HotLib.DotNetExtensions
         /// <param name="target">The target instance containing the property being set.</param>
         /// <param name="value">The value to set the property to.</param>
         /// <param name="useBackingFieldIfNoSetter">If true and the property has no setter, its backing field will be set if it is an auto-property.</param>
-        /// <exception cref="ArgumentException"><paramref name="member"/> is a non-auto property with no setter.</exception>
+        /// <exception cref="ArgumentException"><paramref name="property"/> is a non-auto property with no setter.</exception>
         public static void SetValue(this PropertyInfo property, object target, object value, bool useBackingFieldIfNoSetter)
         {
             var setter = property.GetSetMethod(true);
