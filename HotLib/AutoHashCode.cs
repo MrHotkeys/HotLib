@@ -10,15 +10,15 @@ using HotLib.DotNetExtensions;
 namespace HotLib
 {
     /// <summary>
-    /// Used to get hash codes for objects by hashing all members marked with <see cref="IncludeInHashAttribute"/>.
+    /// Used to get hash codes for objects by hashing all members marked with <see cref="IncludeInHashCodeAttribute"/>.
     /// </summary>
     public static class AutoHashCode
     {
         /// <summary>
         /// Marks a field or property to be included in calculating a hash code.
         /// </summary>
-        [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-        public sealed class IncludeInHashAttribute : Attribute
+        [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+        public sealed class IncludeInHashCodeAttribute : Attribute
         { }
 
         private delegate int HashCodeFunction(object target, bool includeBaseTypes, IHashCodeGenerator hashCodeGenerator);
@@ -30,16 +30,16 @@ namespace HotLib
             new ConcurrentDictionary<Type, HashCodeFunction>();
 
         /// <summary>
-        /// Gets a hash code for an object by hashing all members marked with <see cref="IncludeInHashAttribute"/>.
+        /// Gets a hash code for an object by hashing all members marked with <see cref="IncludeInHashCodeAttribute"/>.
         /// </summary>
         /// <param name="target">The target object to get a hash code for.</param>
         /// <param name="includeInherited">Whether or not to include members defined
-        ///     in base types marked with <see cref="IncludeInHashAttribute"/>.</param>
+        ///     in base types marked with <see cref="IncludeInHashCodeAttribute"/>.</param>
         /// <param name="hashCodeGenerator">Used to hash member values.
         ///     If null, <see cref="DefaultComparerHashCodeGenerator"/> will be used.</param>
         /// <returns>The generated hash code.</returns>
         /// <exception cref="InvalidOperationException">No members marked with
-        ///     <see cref="IncludeInHashAttribute"/> found in the target object.</exception>
+        ///     <see cref="IncludeInHashCodeAttribute"/> found in the target object.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="target"/> is null.</exception>
         public static int GetHashCode(object target, bool includeInherited = true, IHashCodeGenerator hashCodeGenerator = null)
         {
@@ -60,13 +60,13 @@ namespace HotLib
         /// Gets a <see cref="HashCodeFunction"/> for hashing objects of the given <see cref="Type"/>.
         /// </summary>
         /// <param name="type">The type to get a hash code function for.</param>
-        /// <exception cref="InvalidOperationException">No members marked with <see cref="IncludeInHashAttribute"/>
+        /// <exception cref="InvalidOperationException">No members marked with <see cref="IncludeInHashCodeAttribute"/>
         ///     found in the target type.</exception>
         private static HashCodeFunction GetHashCodeFunction(Type type)
         {
             GetIncludedMembers(type, out var declaredMembers, out var inheritedMembers);
             if (declaredMembers.Length == 0 && inheritedMembers.Length == 0)
-                throw new InvalidOperationException($"{type} has no members marked with {nameof(IncludeInHashAttribute)}!");
+                throw new InvalidOperationException($"{type} has no members marked with {nameof(IncludeInHashCodeAttribute)}!");
 
             // Represents the parameters to the hash code function - the target object, boxed as an object, whether
             // or not to include members from base types, and the hash code generator for hashing member values
@@ -78,33 +78,55 @@ namespace HotLib
             // We start with a large prime and then mutate it with each member value
             var startHashCode = Expression.Constant(unchecked((int)2166136261), typeof(int));
 
-            // Get the expression for the hash code with just declared values
+            // Get the expression for the hash code with just declared values and create a local variable to store it in
             var declaredHashCodeExpression = AppendHashCodeExpression(startHashCode, declaredMembers,
-                                                                  boxedTargetParameterExpression,
-                                                                  hashCodeGeneratorParameterExpression);
+                                                                      boxedTargetParameterExpression,
+                                                                      hashCodeGeneratorParameterExpression);
             var declaredHashCodeVariableExpression = Expression.Variable(typeof(int), "declaredHashCode");
             var declaredHashCodeVariableAssignExpression = Expression.Assign(declaredHashCodeVariableExpression,
                                                                              declaredHashCodeExpression);
 
             // Get the expression for the hash code with declared and inherited values
             var allHashCodeExpression = AppendHashCodeExpression(declaredHashCodeVariableExpression, inheritedMembers,
-                                                             boxedTargetParameterExpression,
-                                                             hashCodeGeneratorParameterExpression);
+                                                                 boxedTargetParameterExpression,
+                                                                 hashCodeGeneratorParameterExpression);
 
             // The label used to return out of the block expression that represents the body of the method
             var returnLabel = Expression.Label(typeof(int));
-            var returnExpression = Expression.Label(returnLabel, Expression.Constant(-1, typeof(int)));
+            var returnExpression = Expression.Label(returnLabel,
+                                                    Expression.Constant(-1, typeof(int)));
 
             // Branch depending on whether we are including inherited members
             var ifIncludeInheritedExpression = Expression.IfThenElse(includeInheritedParameterExpression,
-                                                       Expression.Return(returnLabel, allHashCodeExpression),
-                                                       Expression.Return(returnLabel, declaredHashCodeVariableExpression));
-            
+                                                                     Expression.Return(returnLabel, allHashCodeExpression),
+                                                                     Expression.Return(returnLabel, declaredHashCodeVariableExpression));
+
+            // Holds the group of expressions as we're working with it and conditionally adding more
+            var expressions = new List<Expression>()
+            {
+                declaredHashCodeVariableAssignExpression,
+                ifIncludeInheritedExpression,
+                returnExpression,
+            };
+
+            // If there are no declared members, add a guard clause to the beginning of the hash code function so that if false
+            // is passed for including inherited members, an exception would be thrown (otherwise there'd be nothing to hash)
+            if (declaredMembers.Length == 0)
+            {
+                var exceptionMessage = $"{type} has no members marked with {typeof(IncludeInHashCodeAttribute)}, so " +
+                                       $"inherited members must be included or there will be nothing to hash!";
+                var exceptionConstructor = typeof(InvalidOperationException).GetConstructor(new[] { typeof(string) });
+                var exceptionExpression = Expression.New(exceptionConstructor,
+                                                         Expression.Constant(exceptionMessage));
+                var throwExpression = Expression.Throw(exceptionExpression);
+                var guardClauseExpression = Expression.IfThen(Expression.Not(includeInheritedParameterExpression),
+                                                              throwExpression);
+                expressions.Insert(0, guardClauseExpression);
+            }
+
             // The block expression that represents the body of the generated method
-            var blockExpression = Expression.Block(new[] { declaredHashCodeVariableExpression },
-                                                   declaredHashCodeVariableAssignExpression,
-                                                   ifIncludeInheritedExpression,
-                                                   returnExpression);
+            var variables = Enumerable.Repeat(declaredHashCodeVariableExpression, 1);
+            var blockExpression = Expression.Block(variables, expressions);
 
             return Expression.Lambda<HashCodeFunction>(blockExpression,
                                                        boxedTargetParameterExpression,
@@ -158,13 +180,13 @@ namespace HotLib
         }
 
         /// <summary>
-        /// Gets all members marked with <see cref="IncludeInHashAttribute"/> in the given type.
+        /// Gets all members marked with <see cref="IncludeInHashCodeAttribute"/> in the given type.
         /// </summary>
         /// <param name="type">The type to get members from.</param>
         /// <param name="declared">Will be set to an array of all declared members marked
-        ///     with <see cref="IncludeInHashAttribute"/>.</param>
+        ///     with <see cref="IncludeInHashCodeAttribute"/>.</param>
         /// <param name="inherited">Will be set to an array of all inherited members marked
-        ///     with <see cref="IncludeInHashAttribute"/>.</param>
+        ///     with <see cref="IncludeInHashCodeAttribute"/>.</param>
         /// <returns>An enumerable of all found members.</returns>
         private static void GetIncludedMembers(Type type, out MemberInfo[] declared, out MemberInfo[] inherited)
         {
@@ -178,7 +200,7 @@ namespace HotLib
             {
                 declared = type.GetMembers(BindingFlags.DeclaredOnly | BindingFlags.Public |
                                            BindingFlags.NonPublic | BindingFlags.Instance)
-                               .Where(m => m.GetCustomAttribute(typeof(IncludeInHashAttribute)) != null)
+                               .Where(m => m.GetCustomAttribute(typeof(IncludeInHashCodeAttribute)) != null)
                                .ToArray();
 
                 var declaredProperties = declared.OfType<PropertyInfo>()
@@ -190,7 +212,7 @@ namespace HotLib
                 {
                     var membersWithAttribute = currentType.GetMembers(BindingFlags.DeclaredOnly | BindingFlags.Public |
                                                                       BindingFlags.NonPublic | BindingFlags.Instance)
-                                                          .Where(m => m.GetCustomAttribute(typeof(IncludeInHashAttribute)) != null);
+                                                          .Where(m => m.GetCustomAttribute(typeof(IncludeInHashCodeAttribute)) != null);
 
                     foreach (var member in membersWithAttribute)
                     {
