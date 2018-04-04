@@ -11,6 +11,7 @@ namespace HotLib
 {
     /// <summary>
     /// Used to get hash codes for objects by hashing all members marked with <see cref="IncludeInHashCodeAttribute"/>.
+    /// Contains classes for marking members as belong to hash codes and for hashing them.
     /// </summary>
     public static class AutoHashCode
     {
@@ -21,17 +22,28 @@ namespace HotLib
         public sealed class IncludeInHashCodeAttribute : Attribute
         { }
 
-        private delegate int HashCodeFunction(object target, bool includeBaseTypes, IHashCodeGenerator hashCodeGenerator);
+        /// <summary>
+        /// The delegate type for hash code functions which are used to get hash codes from
+        /// objects with members marked with <see cref="IncludeInHashCodeAttribute"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of target object that the function can create hash codes from.</typeparam>
+        /// <param name="target">The target object to create a hash code from.</param>
+        /// <param name="includeInherited">Whether or not to include members defined
+        ///     in base types marked with <see cref="IncludeInHashCodeAttribute"/>.</param>
+        /// <param name="hashCodeGenerator">Used to hash member values.</param>
+        /// <returns>The hash code for the given target object.</returns>
+        private delegate int HashCodeFunction<T>(T target, bool includeInherited, IHashCodeGenerator hashCodeGenerator);
 
         /// <summary>
         /// Contains cached hash code functions, with the types the functions correspond to as the keys.
         /// </summary>
-        private static ConcurrentDictionary<Type, HashCodeFunction> HashCodeFunctionCache { get; } =
-            new ConcurrentDictionary<Type, HashCodeFunction>();
+        private static ConcurrentDictionary<Type, object> HashCodeFunctionCache { get; set; } =
+            new ConcurrentDictionary<Type, object>();
 
         /// <summary>
         /// Gets a hash code for an object by hashing all members marked with <see cref="IncludeInHashCodeAttribute"/>.
         /// </summary>
+        /// <typeparam name="T">The type of target object that the function can create hash codes from.</typeparam>
         /// <param name="target">The target object to get a hash code for.</param>
         /// <param name="includeInherited">Whether or not to include members defined
         ///     in base types marked with <see cref="IncludeInHashCodeAttribute"/>.</param>
@@ -41,36 +53,38 @@ namespace HotLib
         /// <exception cref="InvalidOperationException">No members marked with
         ///     <see cref="IncludeInHashCodeAttribute"/> found in the target object.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="target"/> is null.</exception>
-        public static int GetHashCode(object target, bool includeInherited = true, IHashCodeGenerator hashCodeGenerator = null)
+        public static int GetHashCode<T>(T target, bool includeInherited = true, IHashCodeGenerator hashCodeGenerator = null)
         {
             if (target == null)
                 throw new ArgumentNullException(nameof(target));
 
-            var type = target.GetType();
-            if (!HashCodeFunctionCache.TryGetValue(type, out var func))
+            if (!HashCodeFunctionCache.TryGetValue(typeof(T), out var boxedHashCodeFunction))
             {
-                func = GetHashCodeFunction(type);
-                HashCodeFunctionCache.TryAdd(type, func);
+                boxedHashCodeFunction = GetHashCodeFunction<T>();
+                HashCodeFunctionCache.TryAdd(typeof(T), boxedHashCodeFunction);
             }
 
-            return func.Invoke(target, includeInherited, hashCodeGenerator ?? DefaultComparerHashCodeGenerator.Instance);
+            var hashCodeFunction = boxedHashCodeFunction as HashCodeFunction<T>;
+            return hashCodeFunction.Invoke(target, includeInherited,
+                                           hashCodeGenerator ?? DefaultComparerHashCodeGenerator.Instance);
         }
 
         /// <summary>
-        /// Gets a <see cref="HashCodeFunction"/> for hashing objects of the given <see cref="Type"/>.
+        /// Gets a <see cref="HashCodeFunction{T}"/> for hashing objects of the given <see cref="Type"/>.
         /// </summary>
-        /// <param name="type">The type to get a hash code function for.</param>
+        /// <typeparam name="T">The type of target object that the function can create hash codes from.</typeparam>
+        /// <returns>The created hash code function.</returns>
         /// <exception cref="InvalidOperationException">No members marked with <see cref="IncludeInHashCodeAttribute"/>
         ///     found in the target type.</exception>
-        private static HashCodeFunction GetHashCodeFunction(Type type)
+        private static HashCodeFunction<T> GetHashCodeFunction<T>()
         {
-            GetIncludedMembers(type, out var declaredMembers, out var inheritedMembers);
+            GetIncludedMembers<T>(out var declaredMembers, out var inheritedMembers);
             if (declaredMembers.Length == 0 && inheritedMembers.Length == 0)
-                throw new InvalidOperationException($"{type} has no members marked with {nameof(IncludeInHashCodeAttribute)}!");
+                throw new InvalidOperationException($"{typeof(T)} has no members marked with {nameof(IncludeInHashCodeAttribute)}!");
 
-            // Represents the parameters to the hash code function - the target object, boxed as an object, whether
-            // or not to include members from base types, and the hash code generator for hashing member values
-            var boxedTargetParameterExpression = Expression.Parameter(typeof(object));
+            // Represents the parameters to the hash code function - the target object, whether or not
+            // to include members from base types, and the hash code generator for hashing member values
+            var targetParameterExpression = Expression.Parameter(typeof(T));
             var includeInheritedParameterExpression = Expression.Parameter(typeof(bool));
             var hashCodeGeneratorParameterExpression = Expression.Parameter(typeof(IHashCodeGenerator));
 
@@ -79,17 +93,17 @@ namespace HotLib
             var startHashCode = Expression.Constant(unchecked((int)2166136261), typeof(int));
 
             // Get the expression for the hash code with just declared values and create a local variable to store it in
-            var declaredHashCodeExpression = AppendHashCodeExpression(startHashCode, declaredMembers,
-                                                                      boxedTargetParameterExpression,
-                                                                      hashCodeGeneratorParameterExpression);
+            var declaredHashCodeExpression = AppendHashCodeExpression<T>(startHashCode, declaredMembers,
+                                                                         targetParameterExpression,
+                                                                         hashCodeGeneratorParameterExpression);
             var declaredHashCodeVariableExpression = Expression.Variable(typeof(int), "declaredHashCode");
             var declaredHashCodeVariableAssignExpression = Expression.Assign(declaredHashCodeVariableExpression,
                                                                              declaredHashCodeExpression);
 
             // Get the expression for the hash code with declared and inherited values
-            var allHashCodeExpression = AppendHashCodeExpression(declaredHashCodeVariableExpression, inheritedMembers,
-                                                                 boxedTargetParameterExpression,
-                                                                 hashCodeGeneratorParameterExpression);
+            var allHashCodeExpression = AppendHashCodeExpression<T>(declaredHashCodeVariableExpression, inheritedMembers,
+                                                                    targetParameterExpression,
+                                                                    hashCodeGeneratorParameterExpression);
 
             // The label used to return out of the block expression that represents the body of the method
             var returnLabel = Expression.Label(typeof(int));
@@ -113,7 +127,7 @@ namespace HotLib
             // is passed for including inherited members, an exception would be thrown (otherwise there'd be nothing to hash)
             if (declaredMembers.Length == 0)
             {
-                var exceptionMessage = $"{type} has no members marked with {typeof(IncludeInHashCodeAttribute)}, so " +
+                var exceptionMessage = $"{typeof(T)} has no members marked with {typeof(IncludeInHashCodeAttribute)}, so " +
                                        $"inherited members must be included or there will be nothing to hash!";
                 var exceptionConstructor = typeof(InvalidOperationException).GetConstructor(new[] { typeof(string) });
                 var exceptionExpression = Expression.New(exceptionConstructor,
@@ -128,10 +142,10 @@ namespace HotLib
             var variables = Enumerable.Repeat(declaredHashCodeVariableExpression, 1);
             var blockExpression = Expression.Block(variables, expressions);
 
-            return Expression.Lambda<HashCodeFunction>(blockExpression,
-                                                       boxedTargetParameterExpression,
-                                                       includeInheritedParameterExpression,
-                                                       hashCodeGeneratorParameterExpression)
+            return Expression.Lambda<HashCodeFunction<T>>(blockExpression,
+                                                          targetParameterExpression,
+                                                          includeInheritedParameterExpression,
+                                                          hashCodeGeneratorParameterExpression)
                              .Compile();
         }
 
@@ -139,14 +153,15 @@ namespace HotLib
         /// Creates and returns an expression for appending the given
         /// expression for a hash code with more member value mutations.
         /// </summary>
+        /// <typeparam name="T">The type of target object that the hash code is being created for.</typeparam>
         /// <param name="hashCodeExpression">The hash code expression to append.</param>
         /// <param name="members">The members to append the hash code with.</param>
-        /// <param name="boxedTargetParameterExpression">The expression for the target object as a parameter of type object.</param>
+        /// <param name="targetParameterExpression">The expression for the target object as a parameter.</param>
         /// <param name="hashCodeGeneratorExpression">The expression for the hash code generator as a parameter.</param>
         /// <returns>The appended hash code expression.</returns>
-        private static Expression AppendHashCodeExpression(Expression hashCodeExpression, IEnumerable<MemberInfo> members,
-                                                           ParameterExpression boxedTargetParameterExpression,
-                                                           ParameterExpression hashCodeGeneratorExpression)
+        private static Expression AppendHashCodeExpression<T>(Expression hashCodeExpression, IEnumerable<MemberInfo> members,
+                                                              ParameterExpression targetParameterExpression,
+                                                              ParameterExpression hashCodeGeneratorExpression)
         {
             // A constant expression for the prime that we multiply with for each member value
             var hashMultiplyFactorExpression = Expression.Constant(16777619);
@@ -155,7 +170,9 @@ namespace HotLib
             {
                 // Represents the target object, as unboxed from the parameter to its actual type
                 // We unbox here since we can unbox to the member's declaring type to be able to find hidden members
-                var targetExpression = Expression.Convert(boxedTargetParameterExpression, member.DeclaringType);
+                var targetExpression = member.DeclaringType != typeof(T) ?
+                                       Expression.Convert(targetParameterExpression, member.DeclaringType) :
+                                       targetParameterExpression as Expression;
 
                 // Get the value of the member
                 var memberAccessExpression = Expression.PropertyOrField(targetExpression, member.Name);
@@ -182,15 +199,15 @@ namespace HotLib
         /// <summary>
         /// Gets all members marked with <see cref="IncludeInHashCodeAttribute"/> in the given type.
         /// </summary>
-        /// <param name="type">The type to get members from.</param>
+        /// <typeparam name="T">The type to get the members from.</typeparam>
         /// <param name="declared">Will be set to an array of all declared members marked
         ///     with <see cref="IncludeInHashCodeAttribute"/>.</param>
         /// <param name="inherited">Will be set to an array of all inherited members marked
         ///     with <see cref="IncludeInHashCodeAttribute"/>.</param>
         /// <returns>An enumerable of all found members.</returns>
-        private static void GetIncludedMembers(Type type, out MemberInfo[] declared, out MemberInfo[] inherited)
+        private static void GetIncludedMembers<T>(out MemberInfo[] declared, out MemberInfo[] inherited)
         {
-            if (type == typeof(object))
+            if (typeof(T) == typeof(object))
             {
                 declared = Array.Empty<MemberInfo>();
                 inherited = Array.Empty<MemberInfo>();
@@ -198,16 +215,22 @@ namespace HotLib
             }
             else
             {
-                declared = type.GetMembers(BindingFlags.DeclaredOnly | BindingFlags.Public |
-                                           BindingFlags.NonPublic | BindingFlags.Instance)
-                               .Where(m => m.GetCustomAttribute(typeof(IncludeInHashCodeAttribute)) != null)
-                               .ToArray();
+                declared = typeof(T).GetMembers(BindingFlags.DeclaredOnly | BindingFlags.Public |
+                                                BindingFlags.NonPublic | BindingFlags.Instance)
+                                    .Where(m => m.GetCustomAttribute(typeof(IncludeInHashCodeAttribute)) != null)
+                                    .ToArray();
+
+                if (typeof(T).IsValueType)
+                {
+                    inherited = Array.Empty<MemberInfo>();
+                    return;
+                }
 
                 var declaredProperties = declared.OfType<PropertyInfo>()
                                                  .ToArray();
 
                 var inheritedSet = new HashSet<MemberInfo>();
-                var currentType = type.BaseType;
+                var currentType = typeof(T).BaseType;
                 while (currentType != typeof(object))
                 {
                     var membersWithAttribute = currentType.GetMembers(BindingFlags.DeclaredOnly | BindingFlags.Public |
@@ -227,13 +250,19 @@ namespace HotLib
                                 {
                                     if (property.GetMethod != null)
                                     {
-                                        if (!declaredProperties.Any(p => p.GetMethod != null && p.GetMethod.IsOverrideOf(property.GetMethod)))
+                                        if (!declaredProperties.Any(p => p.GetMethod != null &&
+                                            p.GetMethod.IsOverrideOf(property.GetMethod)))
+                                        {
                                             inheritedSet.Add(property);
+                                        }
                                     }
                                     else if (property.SetMethod != null)
                                     {
-                                        if (!declaredProperties.Any(p => p.SetMethod != null && p.SetMethod.IsOverrideOf(property.SetMethod)))
+                                        if (!declaredProperties.Any(p => p.SetMethod != null &&
+                                            p.SetMethod.IsOverrideOf(property.SetMethod)))
+                                        {
                                             inheritedSet.Add(property);
+                                        }
                                     }
                                     else
                                     {
