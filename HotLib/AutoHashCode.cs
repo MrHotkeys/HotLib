@@ -5,6 +5,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
+using HotLib.DotNetExtensions;
+
 namespace HotLib
 {
     /// <summary>
@@ -19,11 +21,13 @@ namespace HotLib
         public sealed class IncludeInHashAttribute : Attribute
         { }
 
+        private delegate int HashCodeFunction(object target, bool includeBaseTypes, IHashCodeGenerator hashCodeGenerator);
+
         /// <summary>
         /// Contains cached hash code functions, with the types the functions correspond to as the keys.
         /// </summary>
-        private static ConcurrentDictionary<Type, Func<object, int>> HashCodeFunctionCache { get; } =
-            new ConcurrentDictionary<Type, Func<object, int>>();
+        private static ConcurrentDictionary<Type, HashCodeFunction> HashCodeFunctionCache { get; } =
+            new ConcurrentDictionary<Type, HashCodeFunction>();
 
         /// <summary>
         /// Gets a hash code for an object by hashing all members marked with <see cref="IncludeInHashAttribute"/>.
@@ -31,13 +35,13 @@ namespace HotLib
         /// <param name="target">The target object to get a hash code for.</param>
         /// <param name="includeBaseTypes">Whether or not to include members defined
         ///     in base types marked with <see cref="IncludeInHashAttribute"/>.</param>
-        /// <param name="comparerProvider">Used to get equality compapers to hash member values.
-        ///     If null, <see cref="DefaultEqualityComparerProvider"/> will be used.</param>
+        /// <param name="hashCodeGenerator">Used to hash member values.
+        ///     If null, <see cref="DefaultComparerHashCodeGenerator"/> will be used.</param>
         /// <returns>The generated hash code.</returns>
         /// <exception cref="InvalidOperationException">No members marked with
         ///     <see cref="IncludeInHashAttribute"/> found in the target object.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="target"/> is null.</exception>
-        public static int GetHashCode(object target, bool includeBaseTypes = true, IEqualityComparerProvider comparerProvider = null)
+        public static int GetHashCode(object target, bool includeBaseTypes = true, IHashCodeGenerator hashCodeGenerator = null)
         {
             if (target == null)
                 throw new ArgumentNullException(nameof(target));
@@ -45,37 +49,34 @@ namespace HotLib
             var type = target.GetType();
             if (!HashCodeFunctionCache.TryGetValue(type, out var func))
             {
-                func = GetHashCodeFunction(type, includeBaseTypes, comparerProvider ?? DefaultEqualityComparerProvider.Instance);
+                func = GetHashCodeFunction(type);
                 HashCodeFunctionCache.TryAdd(type, func);
             }
 
-            return func.Invoke(target);
+            return func.Invoke(target, includeBaseTypes, hashCodeGenerator ?? DefaultComparerHashCodeGenerator.Instance);
         }
 
         /// <summary>
-        /// Gets a <see cref="Func{T, TResult}"/> that takes an object and returns an <see cref="int"/> hash code.
+        /// Gets a <see cref="HashCodeFunction"/> for hashing objects of the given <see cref="Type"/>.
         /// </summary>
         /// <param name="type">The type to get a hash code function for.</param>
-        /// <param name="includeBaseTypes">Whether or not to include members defined
-        ///     in base types marked with <see cref="IncludeInHashAttribute"/>.</param>
-        /// <param name="comparerProvider">Used to get equality compapers to hash member values.
-        ///     If null, <see cref="DefaultEqualityComparerProvider"/> will be used.</param>
-        /// <returns>The created hash code.</returns>
-        /// <exception cref="InvalidOperationException">No members marked with
-        ///     <see cref="IncludeInHashAttribute"/> found in the target type.</exception>
-        private static Func<object, int> GetHashCodeFunction(Type type, bool includeBaseTypes, IEqualityComparerProvider comparerProvider)
+        /// <exception cref="InvalidOperationException">No members marked with <see cref="IncludeInHashAttribute"/>
+        ///     found in the target type.</exception>
+        private static HashCodeFunction GetHashCodeFunction(Type type)
         {
-            var includedMembers = GetIncludedMembers(type, includeBaseTypes);
+            var includedMembers = GetIncludedMembers(type, true);
             if (!includedMembers.Any())
                 throw new InvalidOperationException($"{type} has no members marked with {nameof(IncludeInHashAttribute)}!");
 
-            // Represents the parameter to the hash code function - the target object, boxed as an object
+            // Represents the parameters to the hash code function - the target object, boxed as an object, whether
+            // or not to include members from base types, and the hash code generator for hashing member values
             var targetParameterExpression = Expression.Parameter(typeof(object));
+            var includeBaseTypesParameterExpression = Expression.Parameter(typeof(bool));
+            var hashCodeGeneratorExpression = Expression.Parameter(typeof(IHashCodeGenerator));
 
             // This is the expression that will give us the hash code
             // We start with a large prime and then mutate it with each member value
             var hashCodeExpression = (Expression)Expression.Constant(unchecked((int)2166136261), typeof(int));
-
 
             // A constant expression for the prime that we multiply with for each member value
             var hashMultiplyFactorExpression = Expression.Constant(16777619);
@@ -86,24 +87,17 @@ namespace HotLib
                 // We unbox here since we can unbox to the member's declaring type to be able to find hidden members
                 var targetExpression = Expression.Convert(targetParameterExpression, member.DeclaringType);
 
-                // Get the value of each member and box
+                // Get the value of the member
                 var memberAccessExpression = Expression.PropertyOrField(targetExpression, member.Name);
 
-                // An expression for the comparer we're going to use when hashing member values
-                var comparerTypeParameters = new[] { member.GetFieldOrPropertyType() };
-                var comparer = comparerProvider.GetType()
-                                               .GetMethod(nameof(IEqualityComparerProvider.GetEqualityComparerFor))
-                                               .MakeGenericMethod(comparerTypeParameters)
-                                               .Invoke(comparerProvider, Array.Empty<object>());
-                var constructedIEqualityComparerType = typeof(IEqualityComparer<>).MakeGenericType(comparerTypeParameters);
-                var comparerExpression = Expression.Constant(comparer, constructedIEqualityComparerType);
-
-                // MethodInfo for EqualityComparer<T>.Default.GetHashCode(T), which we'll need to invoke it over and over for each member
-                var comparerGetHashCodeMethod = constructedIEqualityComparerType.GetMethod(nameof(IEqualityComparer<object>.GetHashCode));
+                // MethodInfo for IHashCodeGenerator.GetHashCode<T>(T)
+                var getHashCodeTypeParameters = new[] { member.GetFieldOrPropertyType() };
+                var getHashCode = typeof(IHashCodeGenerator).GetMethod(nameof(IHashCodeGenerator.GetHashCode))
+                                                            .MakeGenericMethod(getHashCodeTypeParameters);
 
                 // Get the hash for the current member from the default comparer
-                var memberHashExpression = Expression.Call(comparerExpression,
-                                                           comparerGetHashCodeMethod,
+                var memberHashExpression = Expression.Call(hashCodeGeneratorExpression,
+                                                           getHashCode,
                                                            memberAccessExpression);
 
                 // Mutate the hash code based off the hash code for the current member
@@ -112,7 +106,11 @@ namespace HotLib
                 hashCodeExpression = Expression.ExclusiveOr(hashCodeExpression, memberHashExpression);
             }
 
-            return Expression.Lambda<Func<object, int>>(hashCodeExpression, targetParameterExpression).Compile();
+            return Expression.Lambda<HashCodeFunction>(hashCodeExpression,
+                                                       targetParameterExpression,
+                                                       includeBaseTypesParameterExpression,
+                                                       hashCodeGeneratorExpression)
+                             .Compile();
         }
 
         /// <summary>
@@ -158,30 +156,6 @@ namespace HotLib
                 currentType = currentType.BaseType;
             }
             while (includeBaseTypes && currentType != typeof(object));
-        }
-
-        /// <summary>
-        /// Gets the <see cref="Type"/> of the value stored in the member if it is a field or
-        /// property. If not, throws a <see cref="ArgumentException"/>.
-        /// </summary>
-        /// <param name="member">The member to get the type from.</param>
-        /// <returns>The member's value's type.</returns>
-        /// <exception cref="ArgumentException"><paramref name="member"/> is not a field or property.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="member"/> is null.</exception>
-        private static Type GetFieldOrPropertyType(this MemberInfo member)
-        {
-            if (member == null)
-                throw new ArgumentNullException(nameof(member));
-
-            switch (member.MemberType)
-            {
-                case MemberTypes.Field when member is FieldInfo field:
-                    return field.FieldType;
-                case MemberTypes.Property when member is PropertyInfo property:
-                    return property.PropertyType;
-                default:
-                    throw new ArgumentException($"{member} is not a field or property!", nameof(member));
-            }
         }
     }
 }
