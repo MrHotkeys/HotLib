@@ -13,14 +13,20 @@ namespace HotLib
     /// Used to get hash codes for objects by hashing all members marked with <see cref="IncludeInHashCodeAttribute"/>.
     /// Contains classes for marking members as belong to hash codes and for hashing them.
     /// </summary>
-    public static class AutoHashCode
+    public class AttributeBasedHashCodeGenerator : IHashCodeGenerator
     {
         /// <summary>
         /// Marks a field or property to be included in calculating a hash code.
         /// </summary>
         [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-        public sealed class IncludeInHashCodeAttribute : Attribute
-        { }
+        public class IncludeInHashCodeAttribute : Attribute
+        {
+            /// <summary>
+            /// Instantiates a new <see cref="IncludeInHashCodeAttribute"/>.
+            /// </summary>
+            public IncludeInHashCodeAttribute()
+            { }
+        }
 
         /// <summary>
         /// The delegate type for hash code functions which are used to get hash codes from
@@ -32,13 +38,47 @@ namespace HotLib
         ///     in base types marked with <see cref="IncludeInHashCodeAttribute"/>.</param>
         /// <param name="hashCodeGenerator">Used to hash member values.</param>
         /// <returns>The hash code for the given target object.</returns>
-        private delegate int HashCodeFunction<T>(T target, bool includeInherited, IHashCodeGenerator hashCodeGenerator);
+        protected delegate int HashCodeFunction<T>(T target, bool includeInherited, IHashCodeGenerator hashCodeGenerator);
 
         /// <summary>
         /// Contains cached hash code functions, with the types the functions correspond to as the keys.
         /// </summary>
-        private static ConcurrentDictionary<Type, object> HashCodeFunctionCache { get; set; } =
-            new ConcurrentDictionary<Type, object>();
+        protected ConcurrentDictionary<Type, object> HashCodeFunctionCache { get; } = new ConcurrentDictionary<Type, object>();
+
+        /// <summary>
+        /// Instantiates a new <see cref="AttributeBasedHashCodeGenerator"/>.
+        /// </summary>
+        /// <param name="setupTypes">An array of <see cref="Type"/> objects for types that should
+        ///     have their hash codes generated immediately instead of waiting for that type's
+        ///     <see cref="GetHashCode{T}(T, bool, IHashCodeGenerator)"/> to be called.</param>
+        /// <exception cref="InvalidOperationException">A type in <paramref name="setupTypes"/>> has
+        ///     no members marked with <see cref="IncludeInHashCodeAttribute"/> found in the target object.</exception>
+        /// <exception cref="ArgumentException"><paramref name="setupTypes"/> contains a null value.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="setupTypes"/> is null.</exception>
+        public AttributeBasedHashCodeGenerator(params Type[] setupTypes)
+        {
+            if (setupTypes == null)
+                throw new ArgumentNullException(nameof(setupTypes));
+
+            if (setupTypes.Length > 0)
+            {
+                // Have to use reflection since GetHashCodeFunction has a generic
+                // type parameter (which it needs since HashCodeFunction does too)
+                var unconstructed = typeof(AttributeBasedHashCodeGenerator).GetMethod(nameof(GetHashCodeFunction),
+                                                                                      BindingFlags.DeclaredOnly |
+                                                                                      BindingFlags.NonPublic |
+                                                                                      BindingFlags.Instance);
+                foreach (var type in setupTypes)
+                {
+                    if (type == null)
+                        throw new ArgumentException($"Cannot contain null!", nameof(setupTypes));
+
+                    var boxedHashCodeFunction = unconstructed.MakeGenericMethod(type)
+                                                             .Invoke(this, Array.Empty<object>());
+                    HashCodeFunctionCache.TryAdd(type, boxedHashCodeFunction);
+                }
+            }
+        }
 
         /// <summary>
         /// Gets a hash code for an object by hashing all members marked with <see cref="IncludeInHashCodeAttribute"/>.
@@ -53,7 +93,7 @@ namespace HotLib
         /// <exception cref="InvalidOperationException">No members marked with
         ///     <see cref="IncludeInHashCodeAttribute"/> found in the target object.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="target"/> is null.</exception>
-        public static int GetHashCode<T>(T target, bool includeInherited = true, IHashCodeGenerator hashCodeGenerator = null)
+        public virtual int GetHashCode<T>(T target, bool includeInherited = true, IHashCodeGenerator hashCodeGenerator = null)
         {
             if (target == null)
                 throw new ArgumentNullException(nameof(target));
@@ -70,13 +110,20 @@ namespace HotLib
         }
 
         /// <summary>
+        /// Gets a hash code from the given target object.
+        /// </summary>
+        /// <typeparam name="T">The type of target object to get a hash code from.</typeparam>
+        /// <param name="target">The target object to get a hash code from.</param>
+        /// <returns>The object's hash code.</returns>
+        int IHashCodeGenerator.GetHashCode<T>(T target) => GetHashCode(target);
+
+        /// <summary>
         /// Gets a <see cref="HashCodeFunction{T}"/> for hashing objects of the given <see cref="Type"/>.
         /// </summary>
-        /// <typeparam name="T">The type of target object that the function can create hash codes from.</typeparam>
         /// <returns>The created hash code function.</returns>
         /// <exception cref="InvalidOperationException">No members marked with <see cref="IncludeInHashCodeAttribute"/>
         ///     found in the target type.</exception>
-        private static HashCodeFunction<T> GetHashCodeFunction<T>()
+        protected virtual HashCodeFunction<T> GetHashCodeFunction<T>()
         {
             GetIncludedMembers<T>(out var declaredMembers, out var inheritedMembers);
             if (declaredMembers.Length == 0 && inheritedMembers.Length == 0)
@@ -159,7 +206,7 @@ namespace HotLib
         /// <param name="targetParameterExpression">The expression for the target object as a parameter.</param>
         /// <param name="hashCodeGeneratorExpression">The expression for the hash code generator as a parameter.</param>
         /// <returns>The appended hash code expression.</returns>
-        private static Expression AppendHashCodeExpression<T>(Expression hashCodeExpression, IEnumerable<MemberInfo> members,
+        protected virtual Expression AppendHashCodeExpression<T>(Expression hashCodeExpression, IEnumerable<MemberInfo> members,
                                                               ParameterExpression targetParameterExpression,
                                                               ParameterExpression hashCodeGeneratorExpression)
         {
@@ -205,7 +252,7 @@ namespace HotLib
         /// <param name="inherited">Will be set to an array of all inherited members marked
         ///     with <see cref="IncludeInHashCodeAttribute"/>.</param>
         /// <returns>An enumerable of all found members.</returns>
-        private static void GetIncludedMembers<T>(out MemberInfo[] declared, out MemberInfo[] inherited)
+        protected virtual void GetIncludedMembers<T>(out MemberInfo[] declared, out MemberInfo[] inherited)
         {
             if (typeof(T) == typeof(object))
             {
