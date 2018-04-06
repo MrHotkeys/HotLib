@@ -309,5 +309,19 @@ namespace HotLib.Equality
                 inherited = inheritedSet.ToArray();
             }
         }
+
+        /// <summary>
+        /// Creates and returns a new <see cref="UniversalEqualityComparerSpecificationWrapper{T}"/>
+        /// that will allow this <see cref="AttributeBasedUniversalEqualityComparer"/> to act as an
+        /// <see cref="IEqualityComparer{T}"/> for the given type.
+        /// </summary>
+        /// <typeparam name="T">The type to wrap as an equality comparer for.</typeparam>
+        /// <returns>The new <see cref="UniversalEqualityComparerSpecificationWrapper{T}"/> instance.</returns>
+        /// <remarks>The <see cref="UniversalEqualityComparerSpecificationWrapper{T}"/> instances are not cached;
+        ///     they are created new with each call.</remarks>
+        public UniversalEqualityComparerSpecificationWrapper<T> AsEqualityComparer<T>()
+        {
+            return new UniversalEqualityComparerSpecificationWrapper<T>(this);
+        }
     }
 }
