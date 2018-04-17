@@ -29,7 +29,7 @@ namespace HotLib.Helpers
         /// Gets/Sets whether names will be forced to lowercase when validated. For best results this should be changed before any
         /// work is done with the class and should not be changed between versions so mixed results are not yielded.
         /// </summary>
-        public static bool ForceLowercase { get; set; } = true;
+        public static bool ForceLowercase { get; set; } = false;
 
         /// <summary>
         /// Validates the given name, returning it with any necessary minor changes (eg forcing lowercase) and throwing
