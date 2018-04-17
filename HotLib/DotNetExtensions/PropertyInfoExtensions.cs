@@ -33,6 +33,16 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="property"/> is a non-auto property with no getter.</exception>
         public static object GetValue(this PropertyInfo property, object target, bool useBackingFieldIfNoGetter)
         {
+            // Make sure our property comes from its declaring type so that all
+            // the metadata is there (so we can properly find private getters)
+            var targetType = target.GetType();
+            if (property.DeclaringType != targetType)
+            {
+                property = property.DeclaringType
+                                   .GetProperty(property.Name, BindingFlags.Public | BindingFlags.NonPublic |
+                                                               BindingFlags.Instance | BindingFlags.Static);
+            }
+
             var getter = property.GetGetMethod(true);
             if (getter != null)
             {
@@ -40,7 +50,7 @@ namespace HotLib.DotNetExtensions
             }
             else if (useBackingFieldIfNoGetter)
             {
-                var backingField = property.GetBackingField(target.GetType());
+                var backingField = property.GetBackingField(targetType);
 
                 if (backingField != null)
                     return backingField.GetValue(target);
@@ -63,23 +73,34 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="property"/> is a non-auto property with no setter.</exception>
         public static void SetValue(this PropertyInfo property, object target, object value, bool useBackingFieldIfNoSetter)
         {
+            // Make sure our property comes from its declaring type so that all
+            // the metadata is there (so we can properly find private setters)
+            var targetType = target.GetType();
+            if (property.DeclaringType != targetType)
+            {
+                property = property.DeclaringType
+                                   .GetProperty(property.Name, BindingFlags.Public | BindingFlags.NonPublic |
+                                                               BindingFlags.Instance | BindingFlags.Static);
+            }
+
             var setter = property.GetSetMethod(true);
+
             if (setter != null)
             {
                 setter.Invoke(target, new object[] { value });
             }
             else if (useBackingFieldIfNoSetter)
             {
-                var backingField = property.GetBackingField(target.GetType());
+                var backingField = property.GetBackingField(targetType);
 
                 if (backingField != null)
                     backingField.SetValue(target, value);
                 else
-                    throw new ArgumentException($"Could not locate setter or backing field for member {property.DeclaringType}.{property}!");
+                    throw new ArgumentException($"Could not locate setter or backing field for member {property.DeclaringType}.{property.Name}!");
             }
             else
             {
-                throw new ArgumentException($"{property.DeclaringType}.{property} has no setter!");
+                throw new ArgumentException($"{property.DeclaringType}.{property.Name} has no setter!");
             }
         }
 
@@ -115,7 +136,7 @@ namespace HotLib.DotNetExtensions
             else
             {
                 var backingFieldName = $"<{property.Name}>k__BackingField";
-                return type.GetField(backingFieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+                return property.DeclaringType.GetField(backingFieldName, BindingFlags.NonPublic | BindingFlags.Instance);
             }
         }
     }
