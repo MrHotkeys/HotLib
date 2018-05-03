@@ -89,6 +89,35 @@ namespace HotLib.DotNetExtensions
         }
 
         /// <summary>
+        /// Tries to get the first element from the enumerable.
+        /// </summary>
+        /// <typeparam name="T">The type of the values in the enumerable.</typeparam>
+        /// <param name="enumerable">The enumerable to check.</param>
+        /// <param name="first">Will be set to the first item from the enumerable, or the default
+        ///     value for <typeparamref name="T"/> if no items.</param>
+        /// <returns>True if there is at least one element, false if there are 0 elements.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
+        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, out T first)
+        {
+            if (enumerable == null)
+                throw new ArgumentNullException(nameof(enumerable));
+
+            var enumerator = enumerable.GetEnumerator();
+            if (enumerator.MoveNext())
+            {
+                var enumeratorFirst = enumerator.Current;
+                if (!enumerator.MoveNext())
+                {
+                    first = enumeratorFirst;
+                    return true;
+                }
+            }
+
+            first = default;
+            return false;
+        }
+
+        /// <summary>
         /// Filters out the first item in the enumerable that matches the predicate, and yield returns the rest, in order.
         /// If no match, simply all the items in the given enumerable will be yield returned.
         /// </summary>
