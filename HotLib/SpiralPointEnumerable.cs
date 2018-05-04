@@ -70,6 +70,7 @@ namespace HotLib
                     positionY >= 0 && positionY < Height)
                 {
                     yield return (positionX, positionY);
+                    count--;
                 }
 
                 switch (heading)
@@ -115,8 +116,6 @@ namespace HotLib
 
                     distance = (turns / 2) + 1;
                 }
-
-                count--;
             }
         }
 
