@@ -105,16 +105,14 @@ namespace HotLib.DotNetExtensions
             var enumerator = enumerable.GetEnumerator();
             if (enumerator.MoveNext())
             {
-                var enumeratorFirst = enumerator.Current;
-                if (!enumerator.MoveNext())
-                {
-                    first = enumeratorFirst;
-                    return true;
-                }
+                first = enumerator.Current;
+                return true;
             }
-
-            first = default;
-            return false;
+            else
+            {
+                first = default;
+                return false;
+            }
         }
 
         /// <summary>
