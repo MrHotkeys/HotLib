@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace HotLib.DotNetExtensions
 {
@@ -80,6 +81,7 @@ namespace HotLib.DotNetExtensions
                 if (!enumerator.MoveNext())
                 {
                     single = first;
+                    enumerator.Dispose();
                     return true;
                 }
             }
@@ -106,6 +108,7 @@ namespace HotLib.DotNetExtensions
             if (enumerator.MoveNext())
             {
                 first = enumerator.Current;
+                enumerator.Dispose();
                 return true;
             }
             else
@@ -342,6 +345,119 @@ namespace HotLib.DotNetExtensions
                 throw new ArgumentNullException(nameof(seperator));
 
             return string.Join(seperator, strings);
+        }
+
+        /// <summary>
+        /// Copies all items from the enumerable into a new two-dimensional array.
+        /// </summary>
+        /// <typeparam name="T">The type of item in the enumerable.</typeparam>
+        /// <param name="enumerable">The enumerable of items to copy from.</param>
+        /// <param name="length0">The length of the 0th dimension in the 2D array.</param>
+        /// <param name="length1">The length of the 1st dimension in the 2D array.</param>
+        /// <returns>The created 2D array.</returns>
+        /// <exception cref="ArgumentException"><paramref name="length0"/> or <paramref name="length1"/> is non-positive.
+        ///     -or-<paramref name="enumerable"/> does not contain enough items for the given <paramref name="length0"/>
+        ///     and <paramref name="length1"/> values.
+        ///     -or-<paramref name="enumerable"/> contains too many tems for the given <paramref name="length0"/> 
+        ///     and <paramref name="length1"/> values.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
+        public static T[,] ToArray2D<T>(this IEnumerable<T> enumerable, int length0, int length1)
+        {
+            if (enumerable == null)
+                throw new ArgumentNullException(nameof(enumerable));
+            if (length0 <= 0)
+                throw new ArgumentException("Must be positive!", nameof(length0));
+            if (length1 <= 0)
+                throw new ArgumentException("Must be positive!", nameof(length1));
+
+            var enumerator = enumerable.GetEnumerator();
+            var array = new T[length0, length1];
+            for (var i1 = 0; i1 < length1; i1++)
+            {
+                for (var i0 = 0; i0 < length0; i0++)
+                {
+                    // Make sure we have an item for this spot
+                    if (!enumerator.MoveNext())
+                    {
+                        throw new ArgumentException($"Enumerable only has {i1 * length0 + i0} items (requires " +
+                                                    $"{length0 * length1})!", nameof(enumerable));
+                    }
+
+                    array[i0, i1] = enumerator.Current;
+                }
+            }
+
+            // Make sure nothing left over
+            if (enumerator.MoveNext())
+            {
+                var count = enumerable.Count();
+                throw new ArgumentException($"Enumerable is too large for the given 2D array " +
+                                            $"dimensions (has {count} items, only space for " +
+                                            $"{length0 * length1})!", nameof(enumerable));
+            }
+
+            enumerator.Dispose();
+
+            return array;
+        }
+
+        /// <summary>
+        /// Copies all items from the enumerable into a new two-dimensional array in the heap.
+        /// </summary>
+        /// <typeparam name="T">The type of item in the enumerable. Must be an unmanaged type.</typeparam>
+        /// <param name="enumerable">The enumerable of items to copy from.</param>
+        /// <param name="length0">The length of the 0th dimension in the 2D array.</param>
+        /// <param name="length1">The length of the 1st dimension in the 2D array.</param>
+        /// <returns>An <see cref="IntPtr"/> to the created 2D array.</returns>
+        /// <exception cref="ArgumentException"><paramref name="length0"/> or <paramref name="length1"/> is non-positive.
+        ///     -or-<paramref name="enumerable"/> does not contain enough items for the given <paramref name="length0"/>
+        ///     and <paramref name="length1"/> values.
+        ///     -or-<paramref name="enumerable"/> contains too many tems for the given <paramref name="length0"/> 
+        ///     and <paramref name="length1"/> values.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
+        public static unsafe IntPtr ToArray2DPointer<T>(this IEnumerable<T> enumerable, int length0, int length1)
+            where T : unmanaged
+        {
+            if (enumerable == null)
+                throw new ArgumentNullException(nameof(enumerable));
+            if (length0 <= 0)
+                throw new ArgumentException("Must be positive!", nameof(length0));
+            if (length1 <= 0)
+                throw new ArgumentException("Must be positive!", nameof(length1));
+
+            var itemsTotal = length0 * length1;
+            var pointer = Marshal.AllocHGlobal(itemsTotal * sizeof(T));
+            var array = (T*)pointer.ToPointer();
+
+            var enumerator = enumerable.GetEnumerator();
+            for (var i1 = 0; i1 < length1; i1++)
+            {
+                for (var i0 = 0; i0 < length0; i0++)
+                {
+                    // Make sure we have an item for this spot
+                    if (!enumerator.MoveNext())
+                    {
+                        throw new ArgumentException($"Enumerable only has {i1 * length0 + i0} items (requires " +
+                                                    $"{itemsTotal})!", nameof(enumerable));
+                    }
+
+                    var index = i1 * length0 + i0;
+                    array[index] = enumerator.Current;
+                }
+            }
+
+            // Make sure nothing left over
+            if (enumerator.MoveNext())
+            {
+                var itemsGiven = enumerable.Count();
+                throw new ArgumentException($"Enumerable is too large for the given 2D array " +
+                                            $"dimensions (has {itemsGiven} items, only space for " +
+                                            $"{itemsTotal})!", nameof(enumerable));
+            }
+
+            enumerator.Dispose();
+
+            return pointer;
         }
     }
 }

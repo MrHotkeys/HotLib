@@ -9,6 +9,7 @@
     <Company>HotCrane Softworks</Company>
     <LangVersion>latest</LangVersion>
     <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug (Project References)'">
