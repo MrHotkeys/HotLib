@@ -64,7 +64,7 @@ namespace HotLib.DotNetExtensions
 
             void CopyRecursivelyAtDimension(int dimension)
             {
-                var indexMax = Math.Min(source.GetLength(dimension), dimensionSizes[dimension]);
+                var indexMax = System.Math.Min(source.GetLength(dimension), dimensionSizes[dimension]);
                 for (var index = 0; index < indexMax; index++)
                 {
                     indices[dimension] = index;

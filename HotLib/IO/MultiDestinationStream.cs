@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.IO;
+using System.Linq;
 
-namespace HotLib
+namespace HotLib.IO
 {
     /// <summary>
     /// A write-only stream that works as a collection of streams, mirroring

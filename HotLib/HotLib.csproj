@@ -25,4 +25,12 @@
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="IO\" />
+    <Folder Include="Bits\" />
+    <Folder Include="Math\" />
+    <Folder Include="Xml\" />
+    <Folder Include="Reflection\" />
+  </ItemGroup>
+
 </Project>

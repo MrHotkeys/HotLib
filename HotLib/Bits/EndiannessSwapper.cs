@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace HotLib
+namespace HotLib.Bits
 {
     /// <summary>
     /// Contains helper methods for swapping the endianness of unmanaged values.

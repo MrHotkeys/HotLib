@@ -1,4 +1,4 @@
-﻿namespace HotLib.Helpers
+﻿namespace HotLib.Bits
 {
     /// <summary>
     /// Contains public static helper classes for working with bits.

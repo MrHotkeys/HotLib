@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace HotLib
+namespace HotLib.Bits
 {
     /// <summary>
     /// Provides quick byte conversion which does not require any

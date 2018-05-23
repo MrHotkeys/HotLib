@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace HotLib
+namespace HotLib.Math
 {
     public struct SpiralPointEnumerable : IEnumerable<(int x, int y)>
     {
@@ -36,11 +36,11 @@ namespace HotLib
                 throw new ArgumentException("Must be positive!", nameof(height));
             Height = height;
 
-            if (Math.Abs(axesX) != 1)
+            if (System.Math.Abs(axesX) != 1)
                 throw new ArgumentException("Axis values must be 1 or -1 to indicate behavior as we move right!", nameof(axesX));
             AxesX = axesX;
 
-            if (Math.Abs(axesY) != 1)
+            if (System.Math.Abs(axesY) != 1)
                 throw new ArgumentException("Axis values must be 1 or -1 to indicate behavior as we move up!", nameof(axesY));
             AxesY = axesY;
         }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace HotLib
+namespace HotLib.IO
 {
     /// <summary>
     /// Defines public members for types used to compare file and directory paths.

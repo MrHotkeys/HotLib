@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace HotLib
+namespace HotLib.Reflection
 {
     /// <summary>
     /// Compares two <see cref="AssemblyName"/> instances for equality by comparing

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace HotLib
+namespace HotLib.IO
 {
     /// <summary>
     /// An file path comparer which queries the running OS to determine the comparison method.

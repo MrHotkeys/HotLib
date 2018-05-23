@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace HotLib
+namespace HotLib.Reflection
 {
     /// <summary>
     /// An <see cref="AssemblyLoadContext"/> implementation which probes the current application domain's
