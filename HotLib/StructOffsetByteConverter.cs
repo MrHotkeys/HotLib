@@ -198,16 +198,17 @@ namespace HotLib
         /// <param name="bytes">An array of bytes to start with.</param>
         /// <param name="index">The index to start copying from.</param>
         /// <param name="count">The number of bytes to copy.</param>
+        /// <param name="swapEndianness">If true, the endianness of the given byte array is swapped.</param>
         /// <exception cref="ArgumentException"><paramref name="count"/> is negative or larger than 16.</exception>
         /// <exception cref="IndexOutOfRangeException"><paramref name="index"/> is negative.
         ///     -or- <paramref name="index"/> is larger than the max index in <paramref name="bytes"/>.
         ///     -or- The values of <paramref name="index"/> and <paramref name="count"/> will
         ///     go out of bounds of <paramref name="bytes"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="bytes"/> is null.</exception>
-        public StructOffsetByteConverter(byte[] bytes, int index, int count)
+        public StructOffsetByteConverter(byte[] bytes, int index, int count, bool swapEndianness = false)
             : this() // Initialize all the fields with default values
         {
-            CopyFrom(bytes, index, count);
+            CopyFrom(bytes, index, count, swapEndianness);
         }
 
         /// <summary>
@@ -216,13 +217,14 @@ namespace HotLib
         /// <param name="bytes">An array of bytes to start with.</param>
         /// <param name="index">The index to start copying from.</param>
         /// <param name="count">The number of bytes to copy.</param>
+        /// <param name="swapEndianness">If true, the endianness of the given byte array is swapped.</param>
         /// <exception cref="ArgumentException"><paramref name="count"/> is negative or larger than 16.</exception>
         /// <exception cref="IndexOutOfRangeException"><paramref name="index"/> is negative.
         ///     -or- <paramref name="index"/> is larger than the max index in <paramref name="bytes"/>.
         ///     -or- The values of <paramref name="index"/> and <paramref name="count"/> will
         ///     go out of bounds of <paramref name="bytes"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="bytes"/> is null.</exception>
-        public void CopyFrom(byte[] bytes, int index, int count)
+        public void CopyFrom(byte[] bytes, int index, int count, bool swapEndianness = false)
         {
             if (bytes == null)
                 throw new ArgumentNullException(nameof(bytes));
@@ -233,12 +235,60 @@ namespace HotLib
             if (count < 0)
                 throw new ArgumentException("Cannot be negative!", nameof(count));
             if (count > 16)
-                throw new ArgumentException("Cannot copy more than 8 bytes!", nameof(count));
+                throw new ArgumentException("Cannot copy more than 16 bytes!", nameof(count));
             if (index + count > bytes.Length)
                 throw new IndexOutOfRangeException("Byte array is too small for given index and count!");
 
-            for (var offset = 0; offset < count; offset++)
-                this[offset] = bytes[index + offset];
+            if (swapEndianness)
+            {
+                for (var offset = 0; offset < count; offset++)
+                    this[count - offset - 1] = bytes[index + offset];
+            }
+            else
+            {
+                for (var offset = 0; offset < count; offset++)
+                    this[offset] = bytes[index + offset];
+            }
+        }
+
+        /// <summary>
+        /// Copies bytes into the given array.
+        /// </summary>
+        /// <param name="bytes">The array to copy into.</param>
+        /// <param name="index">The index to start copying into.</param>
+        /// <param name="count">The number of bytes to copy.</param>
+        /// <param name="swapEndianness">If true, the endianness of the given byte array is swapped.</param>
+        /// <exception cref="ArgumentException"><paramref name="count"/> is negative or larger than 16.</exception>
+        /// <exception cref="IndexOutOfRangeException"><paramref name="index"/> is negative.
+        ///     -or- <paramref name="index"/> is larger than the max index in <paramref name="bytes"/>.
+        ///     -or- The values of <paramref name="index"/> and <paramref name="count"/> will
+        ///     go out of bounds of <paramref name="bytes"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="bytes"/> is null.</exception>
+        public void CopyTo(byte[] bytes, int index, int count, bool swapEndianness = false)
+        {
+            if (bytes == null)
+                throw new ArgumentNullException(nameof(bytes));
+            if (index < 0)
+                throw new IndexOutOfRangeException("Cannot be negative!");
+            if (index >= bytes.Length)
+                throw new IndexOutOfRangeException("Index larger than max index in byte array!");
+            if (count < 0)
+                throw new ArgumentException("Cannot be negative!", nameof(count));
+            if (count > 16)
+                throw new ArgumentException("Cannot copy more than 16 bytes!", nameof(count));
+            if (index + count > bytes.Length)
+                throw new IndexOutOfRangeException("Byte array is too small for given index and count!");
+
+            if (swapEndianness)
+            {
+                for (var offset = 0; offset < count; offset++)
+                    bytes[index + offset] = this[count - offset - 1];
+            }
+            else
+            {
+                for (var offset = 0; offset < count; offset++)
+                    bytes[index + offset] = this[offset];
+            }
         }
 
         /// <summary>
