@@ -19,6 +19,11 @@ namespace HotLib.Bits.Enumerable
         public const int MaxBits = sizeof(int) * 8;
 
         /// <summary>
+        /// Gets the capcity of the bit container type.
+        /// </summary>
+        protected override int BitContainerCapacity => MaxBits;
+
+        /// <summary>
         /// Instantiates a new <see cref="BitwiseByteEnumerableInt32"/>.
         /// </summary>
         /// <param name="bytes">The enumerable of bytes to wrap.</param>
@@ -35,13 +40,6 @@ namespace HotLib.Bits.Enumerable
                 throw new ArgumentOutOfRangeException($"{typeof(BitwiseByteEnumerableInt32)} can only work " +
                                                       $"with a maximum of {MaxBits} bits!", nameof(bitCount));
         }
-
-        /// <summary>
-        /// Checks if the given container is clear.
-        /// </summary>
-        /// <param name="container">The container to check.</param>
-        /// <returns>True if clear, false if not.</returns>
-        protected override void ClearContainer(ref int container) => container = 0;
 
         /// <summary>
         /// Adds bits from the given byte to the container.

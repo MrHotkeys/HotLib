@@ -11,6 +11,7 @@ namespace HotLib.Bits.Enumerable
     /// <typeparam name="TBitContainer">The type of container to enumerate.
     ///     Determines how many bits can be enumerated at once.</typeparam>
     public abstract class BitwiseByteEnumerable<TBitContainer> : IEnumerable<TBitContainer>
+        where TBitContainer : struct
     {
         /// <summary>
         /// The enumerator for bitwise byte enumerable types.
@@ -90,19 +91,30 @@ namespace HotLib.Bits.Enumerable
             public virtual void Advance(int bitCount) => CurrentByteOffset += bitCount;
 
             /// <summary>
-            /// Moves the enumerator to the next value.
+            /// Tries to takes the given number of bits and return them right-justified in a container.
+            /// The enumerator is moved to the following bit. Returns true on success, false if no more
+            /// data exists. Throws an <see cref="InvalidOperationException"/> if some data exists that
+            /// can be taken but not enough to meet <paramref name="bitCount"/>.
             /// </summary>
-            /// <returns>True if there is another value being enumerated, false if not.</returns>
-            /// <exception cref="InvalidOperationException">Unexpected end of byte data.</exception>
+            /// <param name="bitCount">The number of bits to take.</param>
+            /// <param name="container">Will be set to the container of bits.</param>
+            /// <returns>True if successful, false if not.</returns>
+            /// <exception cref="ArgumentException"><paramref name="bitCount"/> is negative or too large.</exception>
+            /// <exception cref="InvalidOperationException">Some data was taken but not enough remains to finish.</exception>
             /// <exception cref="ObjectDisposedException">The enumerator has been disposed.</exception>
-            public bool MoveNext()
+            public virtual bool TryTake(int bitCount, out TBitContainer container)
             {
                 if (IsDisposed)
                     throw new ObjectDisposedException(null);
+                if (bitCount < 0)
+                    throw new ArgumentException("Must be >= 0!", nameof(bitCount));
+                if (bitCount > Enumerable.BitContainerCapacity)
+                    throw new ArgumentException($"{typeof(TBitContainer)} only has a capacity " +
+                                                $"of {Enumerable.BitContainerCapacity} bits!", nameof(bitCount));
 
-                Enumerable.ClearContainer(ref _current);
+                container = default;
 
-                var bitsNeeded = Enumerable.BitCount;
+                var bitsNeeded = bitCount;
                 var started = false;
                 while (bitsNeeded > 0)
                 {
@@ -115,17 +127,54 @@ namespace HotLib.Bits.Enumerable
                         return false;
                     }
 
-                    started = true;
-
                     var bitsAvailable = ByteBits - CurrentByteOffset;
                     var bitsToMove = System.Math.Min(bitsNeeded, bitsAvailable);
-                    MaskAndCopyBits(ref _current, BytesEnumerator.Current, bitsToMove);
+                    MaskAndCopyBits(ref container, BytesEnumerator.Current, bitsToMove);
 
                     Advance(bitsToMove);
                     bitsNeeded -= bitsToMove;
+                    started = true;
                 }
 
                 return true;
+            }
+
+            /// <summary>
+            /// Takes the given number of bits and returns them right-justified in a container.
+            /// The enumerator is moved to the following bit.
+            /// </summary>
+            /// <param name="bitCount">The number of bits to take.</param>
+            /// <returns>The container of bits.</returns>
+            /// <exception cref="ArgumentException"><paramref name="bitCount"/> is negative or too large.</exception>
+            /// <exception cref="InvalidOperationException">No more data remains to be taken.
+            ///     -or-Some data was taken but not enough remains to finish.</exception>
+            /// <exception cref="ObjectDisposedException">The enumerator has been disposed.</exception>
+            public virtual TBitContainer Take(int bitCount)
+            {
+                if (TryTake(bitCount, out var container))
+                    return container;
+                else
+                    throw new InvalidOperationException("No data remains!");
+            }
+
+            /// <summary>
+            /// Moves the enumerator to the next value.
+            /// </summary>
+            /// <returns>True if there is another value being enumerated, false if not.</returns>
+            /// <exception cref="InvalidOperationException">Unexpected end of byte data.</exception>
+            /// <exception cref="ObjectDisposedException">The enumerator has been disposed.</exception>
+            public bool MoveNext()
+            {
+                if (TryTake(Enumerable.BitCount, out var container))
+                {
+                    _current = container;
+                    return true;
+                }
+                else
+                {
+                    _current = default;
+                    return false;
+                }
             }
 
             /// <summary>
@@ -176,7 +225,7 @@ namespace HotLib.Bits.Enumerable
                     throw new ObjectDisposedException(null);
 
                 BytesEnumerator.Reset();
-                Enumerable.ClearContainer(ref _current);
+                _current = default;
                 CurrentByteOffset = 0;
             }
 
@@ -215,6 +264,11 @@ namespace HotLib.Bits.Enumerable
         public int BitCount { get; }
 
         /// <summary>
+        /// Gets the capcity of the bit container type.
+        /// </summary>
+        protected abstract int BitContainerCapacity { get; }
+
+        /// <summary>
         /// Instantiates a new <see cref="BitwiseByteEnumerable"/>.
         /// </summary>
         /// <param name="bytes">The enumerable of bytes to read from.</param>
@@ -241,12 +295,6 @@ namespace HotLib.Bits.Enumerable
         /// </summary>
         /// <returns>The created enumerator.</returns>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        /// <summary>
-        /// Clears the given bit container.
-        /// </summary>
-        /// <param name="container">The container to clear.</param>
-        protected abstract void ClearContainer(ref TBitContainer container);
 
         /// <summary>
         /// Adds bits from the given byte to the container.
