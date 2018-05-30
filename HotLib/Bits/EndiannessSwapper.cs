@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace HotLib.Bits
@@ -39,10 +38,14 @@ namespace HotLib.Bits
                 for (var offset = 0; offset < byteCount; offset++)
                 {
                     var valueOffset = Expression.Constant(offset);
-                    var accessValue = Expression.MakeIndex(valueParam, indexer, Enumerable.Repeat(valueOffset, 1));
+                    var accessValue = Expression.MakeIndex(instance: valueParam,
+                                                           indexer: indexer,
+                                                           arguments: System.Linq.Enumerable.Repeat(valueOffset, 1));
 
                     var resultOffset = Expression.Constant(byteCount - offset - 1);
-                    var accessResult = Expression.MakeIndex(resultParam, indexer, Enumerable.Repeat(resultOffset, 1));
+                    var accessResult = Expression.MakeIndex(instance: resultParam,
+                                                            indexer: indexer,
+                                                            arguments: System.Linq.Enumerable.Repeat(resultOffset, 1));
 
                     yield return Expression.Assign(accessResult, accessValue);
                 }
