@@ -21,7 +21,7 @@ namespace HotLib.Bits.Enumerable
             /// <summary>
             /// The number of bits in a byte.
             /// </summary>
-            protected const int ByteBits = sizeof(byte) * 8;
+            protected const int BitsInByte = sizeof(byte) * 8;
 
             /// <summary>
             /// Gets the enumerable being enumerated.
@@ -88,7 +88,29 @@ namespace HotLib.Bits.Enumerable
             /// Advances ahead a number of bits. Bits advanced past are discarded.
             /// </summary>
             /// <param name="bitCount">The number of bits to advance.</param>
-            public virtual void Advance(int bitCount) => CurrentByteOffset += bitCount;
+            /// <exception cref="ObjectDisposedException">The enumerator has been disposed.</exception>
+            public virtual void Advance(int bitCount)
+            {
+                if (IsDisposed)
+                    throw new ObjectDisposedException(null);
+
+                CurrentByteOffset += bitCount;
+            }
+
+            /// <summary>
+            /// Advances ahead by how ever many bits until the enumerator moves to a new byte.
+            /// If already at the beginning of a new byte, does nothing.
+            /// </summary>
+            /// <exception cref="ObjectDisposedException">The enumerator has been disposed.</exception>
+            public virtual void AdvanceUntilByteAligned()
+            {
+                if (IsDisposed)
+                    throw new ObjectDisposedException(null);
+
+                var hangingBitCount = CurrentByteOffset % 8;
+                if (hangingBitCount > 0)
+                    CurrentByteOffset += BitsInByte - hangingBitCount;
+            }
 
             /// <summary>
             /// Tries to takes the given number of bits and return them right-justified in a container.
@@ -127,7 +149,7 @@ namespace HotLib.Bits.Enumerable
                         return false;
                     }
 
-                    var bitsAvailable = ByteBits - CurrentByteOffset;
+                    var bitsAvailable = BitsInByte - CurrentByteOffset;
                     var bitsToMove = System.Math.Min(bitsNeeded, bitsAvailable);
                     MaskAndCopyBits(ref container, BytesEnumerator.Current, bitsToMove);
 
@@ -189,7 +211,7 @@ namespace HotLib.Bits.Enumerable
                 {
                     if (BytesEnumerator.MoveNext())
                     {
-                        CurrentByteOffset -= ByteBits;
+                        CurrentByteOffset -= BitsInByte;
                     }
                     else
                     {
@@ -210,7 +232,7 @@ namespace HotLib.Bits.Enumerable
             {
                 var mask = BitHelpers.GetLeftMaskByte(bitCount) >> CurrentByteOffset;
 
-                var bits = (byte)((source & mask) >> (ByteBits - bitCount - CurrentByteOffset));
+                var bits = (byte)((source & mask) >> (BitsInByte - bitCount - CurrentByteOffset));
 
                 Enumerable.AddToContainer(ref container, bits, bitCount);
             }
