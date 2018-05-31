@@ -71,7 +71,7 @@ namespace HotLib.IO
         /// <summary>
         /// Instantiates a new <see cref="StreamSlice"/>.
         /// </summary>
-        /// <param name="baseStream">The base <see cref="Stream"/> to slice.</param>
+        /// <param name="baseStream">The base <see cref="Stream"/> to slice. Must support seeking.</param>
         /// <param name="start">The start position of the slice in the base stream.</param>
         /// <param name="length">The length of the slice.</param>
         /// <exception cref="ArgumentException"><paramref name="start"/> or <paramref name="length"/> is negative.
@@ -95,6 +95,7 @@ namespace HotLib.IO
         /// <summary>
         /// Flushes the base stream.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">The stream has been disposed.</exception>
         public override void Flush() => BaseStream.Flush();
 
         /// <summary>
@@ -180,7 +181,7 @@ namespace HotLib.IO
         public override void SetLength(long value) => throw new NotSupportedException();
 
         /// <summary>
-        /// Writes bytes from a biffer into the slice.
+        /// Writes bytes from a buffer into the slice. Advances the slice's position by the number of bytes written.
         /// </summary>
         /// <param name="buffer">The buffer of bytes to write.</param>
         /// <param name="offset">The offset in the buffer from which to start writing.</param>
@@ -225,6 +226,8 @@ namespace HotLib.IO
                 BaseStream?.Dispose();
 
             base.Dispose(disposing);
+
+            IsDisposed = true;
         }
     }
 }
