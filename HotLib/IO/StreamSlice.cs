@@ -29,7 +29,8 @@ namespace HotLib.IO
         public override long Length { get; }
 
         /// <summary>
-        /// Gets/Sets whether to leave the base stream open or not when the slice is disposed.
+        /// Gets/Sets whether to leave the base stream open or not when the
+        /// slice is disposed. Defaults to <see langword="false"/>.
         /// </summary>
         public bool LeaveOpen { get; set; } = false;
 
@@ -138,8 +139,14 @@ namespace HotLib.IO
         /// <param name="offset">The offset from the origin.</param>
         /// <param name="origin">The origin point to offset from.</param>
         /// <returns>The new position in the slice.</returns>
+        /// <exception cref="ArgumentException"><paramref name="origin"/> has an invalid value.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The new position is outside the bounds of the stream.</exception>
+        /// <exception cref="ObjectDisposedException">The stream has been disposed.</exception>
         public override long Seek(long offset, SeekOrigin origin)
         {
+            if (IsDisposed)
+                throw new ObjectDisposedException(null);
+
             var startPosition = Position;
 
             switch (origin)
@@ -149,10 +156,10 @@ namespace HotLib.IO
                     break;
                 case SeekOrigin.Current:
                     _position += offset;
-                    return Position;
+                    break;
                 case SeekOrigin.End:
-                    _position = End + offset - 1;
-                    return Position;
+                    _position = Length + offset;
+                    break;
                 default:
                     throw new ArgumentException($"Invalid {typeof(SeekOrigin)} value {origin}!", nameof(origin));
             }
@@ -197,11 +204,13 @@ namespace HotLib.IO
             if (offset + count > buffer.Length)
                 throw new ArgumentException("Buffer offset + byte count must be within the bounds of the buffer!", nameof(count));
 
+            BaseStream.Seek(Start + Position, SeekOrigin.Begin);
+
             var bytesLeft = End - BaseStream.Position;
             if (count > bytesLeft)
                 throw new ArgumentException($"Not enough space to write {count} bytes (only {bytesLeft} left)!", nameof(count));
 
-            Write(buffer, offset, count);
+            BaseStream.Write(buffer, offset, count);
             Position += count;
         }
 
