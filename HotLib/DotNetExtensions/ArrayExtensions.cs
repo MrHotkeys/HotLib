@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace HotLib.DotNetExtensions
@@ -74,6 +75,31 @@ namespace HotLib.DotNetExtensions
 
                     if (source.Rank - 1 > dimension)
                         CopyRecursivelyAtDimension(dimension + 1);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets an enumerable for the 2D array that enumerates all values row by row,
+        /// from x=0 to x=width and from y=0 to y=height.
+        /// </summary>
+        /// <typeparam name="T">The type of item in the array.</typeparam>
+        /// <param name="arr">The array to get an enumerable for.</param>
+        /// <returns>The created enumerable.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="arr"/> is null.</exception>
+        public static IEnumerable<T> GetEnumerableByRow<T>(this T[,] arr)
+        {
+            if (arr is null)
+                throw new ArgumentNullException(nameof(arr));
+
+            var width = arr.GetLength(0);
+            var height = arr.GetLength(1);
+
+            for (var y = 0; y < height; y++)
+            {
+                for (var x = 0; x < width; x++)
+                {
+                    yield return arr[x, y];
                 }
             }
         }
