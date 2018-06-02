@@ -5,7 +5,7 @@ namespace HotLib.Bits.Enumerable
 {
     /// <summary>
     /// Wraps an enumerable of bytes and enumerates all bits from them in <see cref="Int32"/>
-    /// values, a set number of bits at a time. Can handle enumerating values of up to 16 bits.
+    /// values, a set number of bits at a time. Can handle enumerating values of up to 32 bits.
     /// </summary>
     public class BitwiseByteEnumerableInt32 : BitwiseByteEnumerable<int>
     {

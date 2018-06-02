@@ -4,10 +4,10 @@ using System.Collections.Generic;
 namespace HotLib.Bits.Enumerable
 {
     /// <summary>
-    /// Wraps an enumerable of bytes and enumerates all bits from them in <see cref="Int64"/>
+    /// Wraps an enumerable of bytes and enumerates all bits from them in <see cref="UInt64"/>
     /// values, a set number of bits at a time. Can handle enumerating values of up to 64 bits.
     /// </summary>
-    public class BitwiseByteEnumerableInt64 : BitwiseByteEnumerable<long>
+    public class BitwiseByteEnumerableUInt64 : BitwiseByteEnumerable<ulong>
     {
         /// <summary>
         /// The minimum number of bits the container can hold.
@@ -16,7 +16,7 @@ namespace HotLib.Bits.Enumerable
         /// <summary>
         /// The maximum number of bits the container can hold.
         /// </summary>
-        public const int MaxBits = sizeof(long) * 8;
+        public const int MaxBits = sizeof(ulong) * 8;
 
         /// <summary>
         /// Gets the capcity of the bit container type.
@@ -31,7 +31,7 @@ namespace HotLib.Bits.Enumerable
         /// <exception cref="ArgumentNullException"><paramref name="bytes"/> is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="bitCount"/> is less
         ///     than <see cref="MinBits"/> or more than <see cref="MaxBits"/>.</exception>
-        public BitwiseByteEnumerableInt64(IEnumerable<byte> bytes, int bitCount)
+        public BitwiseByteEnumerableUInt64(IEnumerable<byte> bytes, int bitCount)
             : base(bytes, bitCount)
         {
             if (bitCount < MinBits)
@@ -48,6 +48,6 @@ namespace HotLib.Bits.Enumerable
         /// <param name="bits">A byte containing the bits to add. The bits should
         ///     be justified to the right end of the byte.</param>
         /// <param name="count">The number of bits being added.</param>
-        protected override void AddToContainer(ref long value, byte bits, int count) => value = (value << count) | bits;
+        protected override void AddToContainer(ref ulong value, byte bits, int count) => value = (value << count) | bits;
     }
 }
