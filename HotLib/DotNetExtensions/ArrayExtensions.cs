@@ -103,5 +103,53 @@ namespace HotLib.DotNetExtensions
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a shallow clone of the array without boxing.
+        /// </summary>
+        /// <typeparam name="T">The type of item in the array.</typeparam>
+        /// <param name="arr">The array to clone.</param>
+        /// <returns>The clone of the array.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="arr"/> is null.</exception>
+        public static T[] Clone<T>(this T[] arr)
+        {
+            if (arr is null)
+                throw new ArgumentNullException(nameof(arr));
+
+            var clone = new T[arr.Length];
+
+            for (var i = 0; i < arr.Length; i++)
+                clone[i] = arr[i];
+
+            return clone;
+        }
+
+        /// <summary>
+        /// Creates a shallow clone of the 2D array without boxing.
+        /// </summary>
+        /// <typeparam name="T">The type of item in the array.</typeparam>
+        /// <param name="arr">The array to clone.</param>
+        /// <returns>The clone of the array.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="arr"/> is null.</exception>
+        public static T[,] Clone<T>(this T[,] arr)
+        {
+            if (arr is null)
+                throw new ArgumentNullException(nameof(arr));
+
+            var width = arr.GetLength(0);
+            var height = arr.GetLength(1);
+
+            var clone = new T[width, height];
+
+            for (var y = 0; y < height; y++)
+            {
+                for (var x = 0; x < width; x++)
+                {
+                    clone[x, y] = arr[x, y];
+                }
+            }
+
+            return clone;
+        }
     }
 }
