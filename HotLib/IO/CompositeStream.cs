@@ -146,7 +146,7 @@ namespace HotLib.IO
         /// <param name="offset">The offset in the buffer at which to start inserting read bytes.</param>
         /// <param name="count">The number of bytes to try to read.</param>
         /// <returns>The number of bytes actually read.</returns>
-        /// <exception cref="ArgumentException"><paramref name="offset"/> is negative or too large for the buffer.
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="offset"/> is negative or too large for the buffer.
         ///     -or-<paramref name="count"/> is negative or too large for the buffer.</exception>
         /// <exception cref="NotSupportedException">The base stream does not support reading.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="buffer"/> is null.</exception>
@@ -157,6 +157,14 @@ namespace HotLib.IO
                 throw new ObjectDisposedException(null);
             if (!CanRead)
                 throw new NotSupportedException("This stream is not set to support reading!");
+            if (buffer is null)
+                throw new ArgumentNullException(nameof(buffer));
+            if (offset < 0 || offset >= buffer.Length)
+                throw new ArgumentOutOfRangeException("Must be within bounds of the buffer!", nameof(offset));
+            if (count < 0)
+                throw new ArgumentOutOfRangeException("Must be >= 0!", nameof(count));
+            if (offset + count > buffer.Length)
+                throw new ArgumentOutOfRangeException("Buffer offset + byte count must be within the bounds of the buffer!", nameof(count));
 
             var totalBytesRead = 0;
 
@@ -249,14 +257,14 @@ namespace HotLib.IO
         /// </summary>
         /// <exception cref="NotSupportedException"/>
         public override void SetLength(long value) => throw new NotSupportedException();
-        
+
         /// <summary>
         /// Writes bytes from a buffer into the stream. Advances the stream's position by the number of bytes written.
         /// </summary>
         /// <param name="buffer">The buffer of bytes to write.</param>
         /// <param name="offset">The offset in the buffer from which to start writing.</param>
         /// <param name="count">The total number of bytes to write.</param>
-        /// <exception cref="ArgumentException"><paramref name="offset"/> is negative or too large for the buffer.
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="offset"/> is negative or too large for the buffer.
         ///     -or-<paramref name="count"/> is negative or too large for the buffer.
         ///     -or-There is not enough space remaining in the stream to write the requested number of bytes.</exception>
         /// <exception cref="NotSupportedException">The base stream does not support writing.</exception>
@@ -268,14 +276,16 @@ namespace HotLib.IO
                 throw new ObjectDisposedException(null);
             if (!CanWrite)
                 throw new NotSupportedException("This stream is not set to support writing!");
+            if (buffer is null)
+                throw new ArgumentNullException(nameof(buffer));
             if (offset < 0 || offset >= buffer.Length)
-                throw new ArgumentException("Must be within bounds of the buffer!", nameof(offset));
+                throw new ArgumentOutOfRangeException("Must be within bounds of the buffer!", nameof(offset));
             if (count < 0)
-                throw new ArgumentException("Must be >= 0!", nameof(count));
+                throw new ArgumentOutOfRangeException("Must be >= 0!", nameof(count));
             if (offset + count > buffer.Length)
-                throw new ArgumentException("Buffer offset + byte count must be within the bounds of the buffer!", nameof(count));
+                throw new ArgumentOutOfRangeException("Buffer offset + byte count must be within the bounds of the buffer!", nameof(count));
             if (Position + count > Length)
-                throw new ArgumentException("Not enough room left in stream!", nameof(count));
+                throw new ArgumentOutOfRangeException("Not enough room left in stream!", nameof(count));
             
             while (count > 0)
             {
