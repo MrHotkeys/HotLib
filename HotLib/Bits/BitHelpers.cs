@@ -152,7 +152,7 @@ namespace HotLib.Bits
         /// <param name="value">The value to get the bits from.</param>
         /// <param name="swapEndianness">Whether or not to swap the endiannes of the value's bytes when printing.</param>
         /// <returns>A string of the value's bits.</returns>
-        public unsafe static string GetBits<T>(T value, bool swapEndianness = false)
+        public unsafe static string GetBitString<T>(T value, bool swapEndianness = false)
             where T : unmanaged
         {
             var stringBuilder = new StringBuilder();
@@ -187,7 +187,7 @@ namespace HotLib.Bits
         /// <summary>
         /// Converts a series of bytes into an unmanaged value.
         /// </summary>
-        /// <typeparam name="T">The unmanaged type to convert the bytes to.</typeparam>
+        /// <typeparam name="T">The unmanaged type to convert the bytes to. Must be unmanaged.</typeparam>
         /// <param name="bytes">The bytes to convert. Will be taken starting from the beginning of the span.</param>
         /// <param name="endianness">The endianness of the given bytes. If it doesn't match the system's endianness,
         ///     the given bytes will be used in reverse order to create the value, such that the endianness of the
@@ -231,7 +231,7 @@ namespace HotLib.Bits
         /// <summary>
         /// Converts a series of bytes into an unmanaged value.
         /// </summary>
-        /// <typeparam name="T">The unmanaged type to convert the bytes to.</typeparam>
+        /// <typeparam name="T">The unmanaged type to convert the bytes to. Must be unmanaged.</typeparam>
         /// <param name="bytes">A pointer to the bytes to convert.</param>
         /// <param name="endianness">The endianness of the given bytes. If it doesn't match the system's endianness,
         ///     the given bytes will be used in reverse order to create the value, such that the endianness of the
@@ -260,7 +260,7 @@ namespace HotLib.Bits
         /// <summary>
         /// Converts a series of bytes into an unmanaged value.
         /// </summary>
-        /// <typeparam name="T">The unmanaged type to convert the bytes to.</typeparam>
+        /// <typeparam name="T">The unmanaged type to convert the bytes to. Must be unmanaged.</typeparam>
         /// <param name="bytes">The bytes to convert.</param>
         /// <param name="offset">The offset from which to start copying in <paramref name="bytes"/>.</param>
         /// <param name="endianness">The endianness of the given bytes. If it doesn't match the system's endianness,
@@ -272,9 +272,6 @@ namespace HotLib.Bits
         public unsafe static T To<T>(byte[] bytes, int offset, Endianness endianness)
             where T : unmanaged
         {
-            if (bytes is null)
-                throw new ArgumentNullException(nameof(bytes));
-
             var ptr = stackalloc byte[sizeof(T)];
 
             try
@@ -302,6 +299,13 @@ namespace HotLib.Bits
                     throw;
                 }
             }
+            catch (ArgumentNullException e)
+            {
+                if (bytes == null)
+                    throw new ArgumentNullException(nameof(bytes), e);
+                else
+                    throw;
+            }
 
             return *(T*)ptr;
         }
@@ -310,7 +314,7 @@ namespace HotLib.Bits
         /// <summary>
         /// Converts a series of bytes into an unmanaged value.
         /// </summary>
-        /// <typeparam name="T">The unmanaged type to convert the bytes to.</typeparam>
+        /// <typeparam name="T">The unmanaged type to convert the bytes to. Must be unmanaged.</typeparam>
         /// <param name="bytes">The bytes to convert.</param>
         /// <param name="endianness">The endianness of the given bytes. If it doesn't match the system's endianness,
         ///     the given bytes will be used in reverse order to create the value, such that the endianness of the
@@ -359,6 +363,158 @@ namespace HotLib.Bits
             }
 
             return *(T*)ptr;
+        }
+
+        /// <summary>
+        /// Gets every <see cref="byte"/> from the given unmanaged value and inserts them into the given <see cref="Span{T}"/> of bytes.
+        /// </summary>
+        /// <typeparam name="T">The type of value to get the bytes of. Must be unmanaged.</typeparam>
+        /// <param name="value">The value to get the bytes of.</param>
+        /// <param name="bytes">The span to insert the bytes into.</param>
+        /// <param name="endianness">The intended endianness of the written bytes. If it does not match the
+        ///     system's endianness, the bytes will be written in reverse order, such that their endianness
+        ///     will match the requested endianness.</param>
+        /// <exception cref="IndexOutOfRangeException"><paramref name="bytes"/> does not have enough room
+        ///     for all the bytes from <paramref name="value"/>.</exception>
+        public unsafe static void GetBytes<T>(T value, Span<byte> bytes, Endianness endianness)
+            where T : unmanaged
+        {
+            var ptr = (byte*)&value;
+
+            try
+            {
+                if (endianness.MatchesSystemEndianness())
+                {
+                    for (var i = 0; i < sizeof(T); i++)
+                        bytes[i] = ptr[i];
+                }
+                else
+                {
+                    for (var i = 0; i < sizeof(T); i++)
+                        bytes[i] = ptr[sizeof(T) - i - 1];
+                }
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                if (bytes.Length < sizeof(T))
+                {
+                    throw new ArgumentException($"Not room for all bytes from {typeof(T)} (got {bytes.Length}, " +
+                                                $"expected {sizeof(T)}!", nameof(bytes), e);
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets every <see cref="byte"/> from the given unmanaged value and writes them in order to the given pointer.
+        /// </summary>
+        /// <typeparam name="T">The type of value to get the bytes of. Must be unmanaged.</typeparam>
+        /// <param name="value">The value to get the bytes of.</param>
+        /// <param name="bytes">The pointer to write the bytes at.</param>
+        /// <param name="endianness">The intended endianness of the written bytes. If it does not match the
+        ///     system's endianness, the bytes will be written in reverse order, such that their endianness
+        ///     will match the requested endianness.</param>
+        public unsafe static void GetBytes<T>(T value, byte* bytes, Endianness endianness)
+            where T : unmanaged
+        {
+            var ptr = (byte*)&value;
+
+            if (endianness.MatchesSystemEndianness())
+            {
+                for (var i = 0; i < sizeof(T); i++)
+                    bytes[i] = ptr[i];
+            }
+            else
+            {
+                for (var i = 0; i < sizeof(T); i++)
+                    bytes[i] = ptr[sizeof(T) - i - 1];
+            }
+        }
+
+        /// <summary>
+        /// Gets every <see cref="byte"/> from the given unmanaged value and inserts them into the given array of bytes.
+        /// </summary>
+        /// <typeparam name="T">The type of value to get the bytes of. Must be unmanaged.</typeparam>
+        /// <param name="value">The value to get the bytes of.</param>
+        /// <param name="bytes">The array to insert the bytes into.</param>
+        /// <param name="endianness">The intended endianness of the written bytes. If it does not match the
+        ///     system's endianness, the bytes will be written in reverse order, such that their endianness
+        ///     will match the requested endianness.</param>
+        /// <exception cref="IndexOutOfRangeException"><paramref name="bytes"/> does not have enough room
+        ///     for all the bytes from <paramref name="value"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="bytes"/> is null.</exception>
+        public unsafe static void GetBytes<T>(T value, byte[] bytes, int offset, Endianness endianness)
+            where T : unmanaged
+        {
+            var ptr = (byte*)&value;
+
+            try
+            {
+                if (endianness.MatchesSystemEndianness())
+                {
+                    for (var i = 0; i < sizeof(T); i++)
+                        bytes[i + offset] = ptr[i];
+                }
+                else
+                {
+                    for (var i = 0; i < sizeof(T); i++)
+                        bytes[i + offset] = ptr[sizeof(T) - i - 1];
+                }
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                if (bytes.Length < sizeof(T))
+                {
+                    throw new ArgumentException($"Not room for all bytes from {typeof(T)} (got {bytes.Length}, " +
+                                                $"expected {sizeof(T)}!", nameof(bytes), e);
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            catch (ArgumentNullException e)
+            {
+                if (bytes == null)
+                    throw new ArgumentNullException(nameof(bytes), e);
+                else
+                    throw;
+            }
+        }
+
+        /// <summary>
+        /// Gets every <see cref="byte"/> from the given unmanaged value and iterates them.
+        /// </summary>
+        /// <typeparam name="T">The type of value to get the bytes of. Must be unmanaged.</typeparam>
+        /// <param name="value">The value to get the bytes of.</param>
+        /// <param name="endianness">The intended endianness of the written bytes. If it does not match the
+        ///     system's endianness, the bytes will be written in reverse order, such that their endianness
+        ///     will match the requested endianness.</param>
+        /// <returns>The created enumerable of bytes.</returns>
+        public unsafe static IEnumerable<byte> GetBytes<T>(T value, Endianness endianness)
+            where T : unmanaged
+        {
+            var wrapped = new WrappedPointer<T>(&value);
+            var size = sizeof(T);
+
+            IEnumerable<byte> Iterate()
+            {
+                if (endianness.MatchesSystemEndianness())
+                {
+                    for (var i = 0; i < size; i++)
+                        yield return wrapped[i];
+                }
+                else
+                {
+                    for (var i = 0; i < size; i++)
+                        yield return wrapped[size - i - 1];
+                }
+            }
+
+            return Iterate();
         }
     }
 }
