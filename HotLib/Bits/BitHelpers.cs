@@ -516,5 +516,56 @@ namespace HotLib.Bits
 
             return Iterate();
         }
+
+        /// <summary>
+        /// Reverses the bits in the given value.
+        /// </summary>
+        /// <typeparam name="T">The type of value of which to reverse the bits. Must be unmanaged.</typeparam>
+        /// <param name="value">The value of which to reverse the bits.</param>
+        /// <returns>The value with reversed bits.</returns>
+        public unsafe static T ReverseBits<T>(T value)
+            where T : unmanaged
+        {
+            var valuePtr = (byte*)&value;
+            var resultPtr = stackalloc byte[sizeof(T)];
+
+            for (var byteOffset = 0; byteOffset < sizeof(T); byteOffset++)
+            {
+                for (var bitOffset = 0; bitOffset < 8; bitOffset++)
+                {
+                    // The mask to get the corresponding bit from the given value
+                    var valueMask = 1 << bitOffset;
+
+                    // The bit from the given value, in the rightmost place
+                    var bit = (valuePtr[byteOffset] & valueMask) >> bitOffset;
+
+                    // The bit from the given value, shifted to line up with where it's going in the result
+                    var bitShifted = bit << (8 - bitOffset - 1);
+                    
+                    // Add the bit to the result
+                    resultPtr[sizeof(T) - byteOffset - 1] |= (byte)bitShifted;
+                }
+            }
+
+            return *(T*)resultPtr;
+        }
+
+        /// <summary>
+        /// Reverses the bytes in the given value.
+        /// </summary>
+        /// <typeparam name="T">The type of value of which to reverse the bytes. Must be unmanaged.</typeparam>
+        /// <param name="value">The value of which to reverse the bytes.</param>
+        /// <returns>The value with reversed bytes.</returns>
+        public unsafe static T ReverseBytes<T>(T value)
+            where T : unmanaged
+        {
+            var valuePtr = (byte*)&value;
+            var resultPtr = stackalloc byte[sizeof(T)];
+
+            for (var byteOffset = 0; byteOffset < sizeof(T); byteOffset++)
+                resultPtr[sizeof(T) - byteOffset - 1] = valuePtr[byteOffset];
+
+            return *(T*)resultPtr;
+        }
     }
 }
