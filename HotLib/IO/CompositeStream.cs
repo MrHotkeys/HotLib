@@ -214,28 +214,26 @@ namespace HotLib.IO
             if (IsDisposed)
                 throw new ObjectDisposedException(null);
 
-            var startPosition = Position;
-
+            var newPosition = _position;
             switch (origin)
             {
                 case SeekOrigin.Begin:
-                    _position = offset;
+                    newPosition = offset;
                     break;
                 case SeekOrigin.Current:
-                    _position += offset;
+                    newPosition += offset;
                     break;
                 case SeekOrigin.End:
-                    _position = Length + offset;
+                    newPosition = Length + offset;
                     break;
                 default:
                     throw new ArgumentException($"Invalid {typeof(SeekOrigin)} value {origin}!", nameof(origin));
             }
 
-            if (Position < 0 || Position > Length)
-            {
-                _position = startPosition;
+            if (newPosition < 0 || newPosition > Length)
                 throw new ArgumentOutOfRangeException(nameof(offset));
-            }
+            else
+                _position = newPosition;
 
             // Move to the correct stream and move that stream to the right position
             if (Position == Length)
