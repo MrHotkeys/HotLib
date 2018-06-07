@@ -374,9 +374,10 @@ namespace HotLib.Bits
         /// <param name="endianness">The intended endianness of the written bytes. If it does not match the
         ///     system's endianness, the bytes will be written in reverse order, such that their endianness
         ///     will match the requested endianness.</param>
+        /// <returns>The number of bytes inserted into the span.</returns>
         /// <exception cref="IndexOutOfRangeException"><paramref name="bytes"/> does not have enough room
         ///     for all the bytes from <paramref name="value"/>.</exception>
-        public unsafe static void GetBytes<T>(T value, Span<byte> bytes, Endianness endianness)
+        public unsafe static int GetBytes<T>(T value, Span<byte> bytes, Endianness endianness)
             where T : unmanaged
         {
             var ptr = (byte*)&value;
@@ -387,11 +388,15 @@ namespace HotLib.Bits
                 {
                     for (var i = 0; i < sizeof(T); i++)
                         bytes[i] = ptr[i];
+
+                    return sizeof(T);
                 }
                 else
                 {
                     for (var i = 0; i < sizeof(T); i++)
                         bytes[i] = ptr[sizeof(T) - i - 1];
+
+                    return sizeof(T);
                 }
             }
             catch (IndexOutOfRangeException e)
@@ -417,7 +422,8 @@ namespace HotLib.Bits
         /// <param name="endianness">The intended endianness of the written bytes. If it does not match the
         ///     system's endianness, the bytes will be written in reverse order, such that their endianness
         ///     will match the requested endianness.</param>
-        public unsafe static void GetBytes<T>(T value, byte* bytes, Endianness endianness)
+        /// <returns>The number of bytes inserted into the pointer.</returns>
+        public unsafe static int GetBytes<T>(T value, byte* bytes, Endianness endianness)
             where T : unmanaged
         {
             var ptr = (byte*)&value;
@@ -426,11 +432,15 @@ namespace HotLib.Bits
             {
                 for (var i = 0; i < sizeof(T); i++)
                     bytes[i] = ptr[i];
+
+                return sizeof(T);
             }
             else
             {
                 for (var i = 0; i < sizeof(T); i++)
                     bytes[i] = ptr[sizeof(T) - i - 1];
+
+                return sizeof(T);
             }
         }
 
@@ -441,12 +451,13 @@ namespace HotLib.Bits
         /// <param name="value">The value to get the bytes of.</param>
         /// <param name="bytes">The array to insert the bytes into.</param>
         /// <param name="endianness">The intended endianness of the written bytes. If it does not match the
+        /// <returns>The number of bytes inserted into the array.</returns>
         ///     system's endianness, the bytes will be written in reverse order, such that their endianness
         ///     will match the requested endianness.</param>
         /// <exception cref="IndexOutOfRangeException"><paramref name="bytes"/> does not have enough room
         ///     for all the bytes from <paramref name="value"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="bytes"/> is null.</exception>
-        public unsafe static void GetBytes<T>(T value, byte[] bytes, int offset, Endianness endianness)
+        public unsafe static int GetBytes<T>(T value, byte[] bytes, int offset, Endianness endianness)
             where T : unmanaged
         {
             var ptr = (byte*)&value;
@@ -457,11 +468,15 @@ namespace HotLib.Bits
                 {
                     for (var i = 0; i < sizeof(T); i++)
                         bytes[i + offset] = ptr[i];
+
+                    return sizeof(T);
                 }
                 else
                 {
                     for (var i = 0; i < sizeof(T); i++)
                         bytes[i + offset] = ptr[sizeof(T) - i - 1];
+
+                    return sizeof(T);
                 }
             }
             catch (IndexOutOfRangeException e)
