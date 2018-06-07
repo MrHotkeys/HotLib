@@ -73,6 +73,19 @@ namespace HotLib.IO
         private static readonly Dictionary<uint, CrcTable> CrcTables;
 
         /// <summary>
+        /// The initial CRC value used for the standard CRC-32 setup.
+        /// </summary>
+        public const uint StandardInitial = 0xFFFFFFFF;
+        /// <summary>
+        /// The polynomial used for the standard CRC-32 setup.
+        /// </summary>
+        public const uint StandardPolynomial = 0x04C11DB7;
+        /// <summary>
+        /// The final XOR value used for the standard CRC-32 setup.
+        /// </summary>
+        public const uint StandardFinalXor = 0xFFFFFFFF;
+
+        /// <summary>
         /// Gets a starting CRC-32 value with 0xFFFFFFFF as the initial value and final XOR, and 0x04C11DB7 as the polynomial.
         /// </summary>
         public static readonly Crc32 Standard;
@@ -84,7 +97,7 @@ namespace HotLib.IO
         static Crc32()
         {
             CrcTables = new Dictionary<uint, CrcTable>();
-            Standard = new Crc32(0xFFFFFFFF, 0x04C11DB7, 0xFFFFFFFF, true);
+            Standard = new Crc32(StandardInitial, StandardPolynomial, StandardFinalXor, true);
         }
 
         /// <summary>
@@ -131,6 +144,22 @@ namespace HotLib.IO
             Crc = crc;
             CorrespondingCrcTable = correspondingCrcTable;
             FinalXor = finalXor;
+        }
+
+        /// <summary>
+        /// Instantiates a new <see cref="Crc32"/> from an existing CRC-32 value.
+        /// </summary>
+        /// <param name="crc">The value to instntiate from. It is assumed that that
+        ///     final XOR value has already been applied.</param>
+        /// <param name="polynomal">The polynomial to use for calculating the CRC.</param>
+        /// <param name="finalXor">The final XOR value to apply to the CRC before returned.</param>
+        /// <param name="cacheCrcTable">Whether or not to cache the generated CRC table in a static value in the type.
+        ///     If this CRC is used as the starting point for others, the CRC table will be carried over from it.
+        ///     The cache is only used if this constructor is called again with the same polynomial.</param>
+        /// <returns>The created <see cref="Crc32"/>.</returns>
+        public static Crc32 FromCrc(uint crc, uint polynomial, uint finalXor, bool cacheCrcTable)
+        {
+            return new Crc32(crc ^ finalXor, polynomial, finalXor, cacheCrcTable);
         }
 
         /// <summary>
