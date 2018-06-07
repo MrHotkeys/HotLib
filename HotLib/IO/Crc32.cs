@@ -232,6 +232,25 @@ namespace HotLib.IO
         /// Updates the CRC with the given array of bytes and returns a new <see cref="Crc32"/> with the updated CRC value.
         /// </summary>
         /// <param name="bytes">The array of bytes to update the CRC with.</param>
+        /// <returns>The updated <see cref="Crc32"/>.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="bytes"/> is null.</exception>
+        public Crc32 Update(byte[] bytes)
+        {
+            if (bytes is null)
+                throw new ArgumentNullException(nameof(bytes));
+
+            var newCrc = Crc;
+
+            for (var i = 0; i < bytes.Length; i++)
+                newCrc = UpdateCrc(newCrc, bytes[i], CorrespondingCrcTable);
+
+            return new Crc32(newCrc, CorrespondingCrcTable, FinalXor);
+        }
+
+        /// <summary>
+        /// Updates the CRC with the given array of bytes and returns a new <see cref="Crc32"/> with the updated CRC value.
+        /// </summary>
+        /// <param name="bytes">The array of bytes to update the CRC with.</param>
         /// <param name="offset">The offset in the array from which to start pulling bytes to update the CRC.</param>
         /// <param name="count">The number of bytes to pull from the array to update the CRC.</param>
         /// <returns>The updated <see cref="Crc32"/>.</returns>
@@ -267,6 +286,25 @@ namespace HotLib.IO
 
             for (var i = 0; i < bytes.Length; i++)
                 newCrc = UpdateCrc(newCrc, bytes[i], CorrespondingCrcTable);
+
+            return new Crc32(newCrc, CorrespondingCrcTable, FinalXor);
+        }
+
+        /// <summary>
+        /// Updates the CRC with the given enumerable of bytes and returns a new <see cref="Crc32"/> with the updated CRC value.
+        /// </summary>
+        /// <param name="bytes">The enumerable of bytes to update the CRC with.</param>
+        /// <returns>The updated <see cref="Crc32"/>.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="bytes"/> is null.</exception>
+        public Crc32 Update(IEnumerable<byte> bytes)
+        {
+            if (bytes is null)
+                throw new ArgumentNullException(nameof(bytes));
+
+            var newCrc = Crc;
+
+            foreach (var b in bytes)
+                newCrc = UpdateCrc(newCrc, b, CorrespondingCrcTable);
 
             return new Crc32(newCrc, CorrespondingCrcTable, FinalXor);
         }
