@@ -85,6 +85,25 @@ namespace HotLib.IO
         ///     contains null.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="baseStreams"/> is null.</exception>
         public CompositeStream(bool canRead, bool canWrite, params Stream[] baseStreams)
+            : this(canRead, canWrite, baseStreams as IEnumerable<Stream>)
+        { }
+
+        /// <summary>
+        /// Instantiates a new <see cref="CompositeStream"/>.
+        /// </summary>
+        /// <param name="canRead">Whether or not this stream will support reading.
+        ///     If true, all base streams must support reading.</param>
+        /// <param name="canWrite">Whether or not this stream will support writing.
+        ///     If true, all base streams must support writing.</param>
+        /// <param name="baseStreams">The enumerable of base streams to make up the composite stream, in the order
+        ///     they should be traversed. All base streams must support seeking and have a fixed length.</param>
+        /// <exception cref="ArgumentException"><paramref name="canRead"/> is true but a stream in
+        ///     <paramref name="baseStreams"/> does not support reading.-or-<paramref name="canWrite"/>
+        ///     is true but a stream in <paramref name="baseStreams"/> does not support writing.-or-A
+        ///     stream in <paramref name="baseStreams"/> does not support seeking.-or-<paramref name="baseStreams"/>
+        ///     contains null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="baseStreams"/> is null.</exception>
+        public CompositeStream(bool canRead, bool canWrite, IEnumerable<Stream> baseStreams)
         {
             if (baseStreams is null)
                 throw new ArgumentNullException(nameof(baseStreams));
