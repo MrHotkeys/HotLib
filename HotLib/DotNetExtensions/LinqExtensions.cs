@@ -91,6 +91,45 @@ namespace HotLib.DotNetExtensions
         }
 
         /// <summary>
+        /// Tries to get the single element from the enumerable.
+        /// If there are no elements, the default value for <typeparamref name="T"/> is returned.
+        /// </summary>
+        /// <typeparam name="T">The type of the values in the enumerable.</typeparam>
+        /// <param name="enumerable">The enumerable to check.</param>
+        /// <param name="single">Will be set to the single item from the enumerable, or the default
+        ///     value for <typeparamref name="T"/> if no items or too many items.</param>
+        /// <returns>True if there is a single element, false if there are 0 or 2+ elements.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
+        public static bool TryGetSingleOrDefault<T>(this IEnumerable<T> enumerable, out T single)
+        {
+            if (enumerable == null)
+                throw new ArgumentNullException(nameof(enumerable));
+
+            var enumerator = enumerable.GetEnumerator();
+            if (enumerator.MoveNext())
+            {
+                var first = enumerator.Current;
+                if (!enumerator.MoveNext())
+                {
+                    single = first;
+                    enumerator.Dispose();
+                    return true;
+                }
+                else
+                {
+                    single = default;
+                    return false;
+                }
+            }
+            else
+            {
+                single = default;
+                return true;
+            }
+
+        }
+
+        /// <summary>
         /// Tries to get the first element from the enumerable.
         /// </summary>
         /// <typeparam name="T">The type of the values in the enumerable.</typeparam>
