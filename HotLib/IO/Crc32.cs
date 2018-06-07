@@ -322,6 +322,50 @@ namespace HotLib.IO
         }
 
         /// <summary>
+        /// Gets if the two <see cref="Crc32"/> values are equal by comparing their values.
+        /// </summary>
+        /// <param name="a">The first CRC to compare.</param>
+        /// <param name="b">The second CRC to compare.</param>
+        /// <returns>True if equal, false if not.</returns>
+        public static bool Equals(Crc32 a, Crc32 b) => a.Crc == b.Crc;
+
+        /// <summary>
+        /// Gets if the <see cref="Crc32"/> is equal to the given CRC.
+        /// </summary>
+        /// <param name="other">The CRC to test against.</param>
+        /// <returns>True if equal, false if not.</returns>
+        public bool Equals(Crc32 other) => Equals(this, other);
+
+        /// <summary>
+        /// Gets if the <see cref="Crc32"/> is equal to the given object.
+        /// </summary>
+        /// <param name="obj">The object to test against.</param>
+        /// <returns>True if equal, false if not.</returns>
+        public override bool Equals(object obj) => obj is Crc32 other && Equals(this, other);
+
+        /// <summary>
+        /// Gets a hash code for the <see cref="Crc32"/>.
+        /// </summary>
+        /// <returns>The created hash code.</returns>
+        public override int GetHashCode() => Crc.GetHashCode();
+
+        /// <summary>
+        /// Gets if the two <see cref="Crc32"/> values are equal by comparing their values.
+        /// </summary>
+        /// <param name="a">The first CRC to compare.</param>
+        /// <param name="b">The second CRC to compare.</param>
+        /// <returns>True if equal, false if not.</returns>
+        public static bool operator ==(Crc32 a, Crc32 b) => Equals(a, b);
+
+        /// <summary>
+        /// Gets if the two <see cref="Crc32"/> values are unequal by comparing their values.
+        /// </summary>
+        /// <param name="a">The first CRC to compare.</param>
+        /// <param name="b">The second CRC to compare.</param>
+        /// <returns>True if unequal, false if not.</returns>
+        public static bool operator !=(Crc32 a, Crc32 b) => !Equals(a, b);
+
+        /// <summary>
         /// Gets a string representation of the CRC, padded to 8 characters.
         /// </summary>
         /// <returns>The created string representation.</returns>
