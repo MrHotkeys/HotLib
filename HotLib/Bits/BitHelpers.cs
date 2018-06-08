@@ -483,7 +483,7 @@ namespace HotLib.Bits
             {
                 if (bytes.Length < sizeof(T))
                 {
-                    throw new ArgumentException($"Not room for all bytes from {typeof(T)} (got {bytes.Length}, " +
+                    throw new ArgumentException($"No room for all bytes from {typeof(T)} (got {bytes.Length}, " +
                                                 $"expected {sizeof(T)}!", nameof(bytes), e);
                 }
                 else
