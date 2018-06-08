@@ -98,9 +98,9 @@ namespace HotLib.IO
         public bool AutoFlush { get; set; } = false;
 
         /// <summary>
-        /// Gets/Sets whether the writer should automatically flush the base stream after every write.
+        /// Gets/Sets whether to flush the base stream when the parameterless <see cref="Flush"/> is called.
         /// </summary>
-        public bool AutoFlushBaseStream { get; set; } = false;
+        public bool FlushBaseStream { get; set; } = true;
 
         /// <summary>
         /// Instantiates a new <see cref="ByteWriter"/>.
@@ -152,9 +152,7 @@ namespace HotLib.IO
             WriteByteInternal(value);
 
             if (AutoFlush)
-                Flush(false);
-            if (AutoFlushBaseStream)
-                BaseStream.Flush();
+                Flush();
 
             return 1;
         }
@@ -205,9 +203,7 @@ namespace HotLib.IO
             }
 
             if (AutoFlush)
-                Flush(false);
-            if (AutoFlushBaseStream)
-                BaseStream.Flush();
+                Flush();
 
             return sizeof(T);
         }
@@ -241,9 +237,7 @@ namespace HotLib.IO
                 WriteByteInternal(bytes[offset + i]);
 
             if (AutoFlush)
-                Flush(false);
-            if (AutoFlushBaseStream)
-                BaseStream.Flush();
+                Flush();
 
             return count;
         }
@@ -274,9 +268,7 @@ namespace HotLib.IO
                 WriteByteInternal(bytes[i]);
 
             if (AutoFlush)
-                Flush(false);
-            if (AutoFlushBaseStream)
-                BaseStream.Flush();
+                Flush();
 
             return bytes.Length;
         }
@@ -304,9 +296,7 @@ namespace HotLib.IO
             }
 
             if (AutoFlush)
-                Flush(false);
-            if (AutoFlushBaseStream)
-                BaseStream.Flush();
+                Flush();
 
             return count;
         }
@@ -331,19 +321,80 @@ namespace HotLib.IO
                 WriteByteInternal(bytes[offset]);
 
             if (AutoFlush)
-                Flush(false);
-            if (AutoFlushBaseStream)
-                BaseStream.Flush();
+                Flush();
 
             return count;
         }
 
         /// <summary>
+        /// Writes every byte from the given stream, starting at its current position, to the internal
+        /// buffer to be later written to the base stream. Leaves the source stream at its end when done.
+        /// </summary>
+        /// <param name="stream">The stream to write the bytes from. Must support reading.</param>
+        /// <returns>The number of bytes written.</returns>
+        /// <exception cref="ArgumentException"><paramref name="stream"/> does not support reading,
+        ///     getting its position, and/or getting its length.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="stream"/> is null.</exception>
+        /// <exception cref="ObjectDisposedException">The writer and/or base stream has been disposed.</exception>
+        public int Write(Stream stream)
+        {
+            if (IsDisposed)
+                throw new ObjectDisposedException(null);
+            if (stream is null)
+                throw new ArgumentNullException(nameof(stream));
+            if (!stream.CanRead)
+                throw new ArgumentException("Must support reading!", nameof(stream));
+
+            bool BytesLeftInStream()
+            {
+                try
+                {
+                    return stream.Position < stream.Length;
+                }
+                catch (NotSupportedException e) when (!System.Diagnostics.Debugger.IsAttached)
+                {
+                    // Either stream.Position.get threw, or stream.Length.get did
+                    try
+                    {
+                        var x = stream.Position;
+
+                        // If we got this far we know it's stream.Length.get
+                        throw new ArgumentException("Does not support getting Length!", nameof(stream), e);
+                    }
+                    catch (NotSupportedException)
+                    {
+                        throw new ArgumentException("Does not support getting Position!", nameof(stream), e);
+                    }
+                }
+            }
+
+            int bytesRead = 0;
+            while (BytesLeftInStream())
+            {
+                bytesRead = stream.Read(Buffer, BufferIndex, Buffer.Length - BufferIndex);
+                BufferIndex += bytesRead;
+
+                if (BufferIndex >= Buffer.Length)
+                    Flush();
+            }
+
+            return bytesRead;
+        }
+
+        /// <summary>
+        /// Flushes the writer's internal buffer to the base stream.
+        /// If <see cref="FlushBaseStream"/>, flushes the base stream as well.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">The writer and/or base stream has been disposed.</exception>
+        public virtual void Flush() => Flush(FlushBaseStream);
+
+        /// <summary>
         /// Flushes the writer's internal buffer to the base stream.
         /// </summary>
-        /// <param name="flushBase">If true, the base stream will be flushed as well.</param>
+        /// <param name="flushBaseStream">If true, the base stream will be flushed as well.
+        ///     Overrides <see cref="FlushBaseStream"/>.</param>
         /// <exception cref="ObjectDisposedException">The writer and/or base stream has been disposed.</exception>
-        public virtual void Flush(bool flushBase = true)
+        public virtual void Flush(bool flushBaseStream)
         {
             if (IsDisposed)
                 throw new ObjectDisposedException(null);
@@ -351,7 +402,7 @@ namespace HotLib.IO
             BaseStream.Write(Buffer, 0, BufferIndex);
             BufferIndex = 0;
 
-            if (flushBase)
+            if (flushBaseStream)
                 BaseStream.Flush();
         }
 
