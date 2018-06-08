@@ -48,32 +48,14 @@ namespace HotLib.IO
         /// <summary>
         /// Gets the writer's internal byte buffer.
         /// </summary>
-        protected byte[] Buffer { get; set; } = new byte[8192];
+        protected byte[] Buffer { get; set; }
 
         /// <summary>
-        /// Gets/Sets the size of the writer's internal byte buffer.
-        /// If the buffer is resized, <see cref="Flush(bool)"/> is called first so that nothing is lost.
+        /// Getsthe size of the writer's internal byte buffer.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">The new buffer size is 0 or negative.</exception>
-        /// <exception cref="ObjectDisposedException">The writer and/or base stream has been disposed.</exception>
         public virtual int BufferSize
         {
             get => Buffer.Length;
-            set
-            {
-                if (IsDisposed)
-                    throw new ObjectDisposedException(null);
-
-                if (Buffer.Length != value)
-                {
-                    if (value <= 0)
-                        throw new ArgumentOutOfRangeException(nameof(value), "Must be > 0!");
-
-                    Flush();
-
-                    Buffer = new byte[value];
-                }
-            }
         }
 
         /// <summary>
@@ -107,13 +89,18 @@ namespace HotLib.IO
         /// </summary>
         /// <param name="baseStream">The base stream to write to. Its <see cref="Stream.CanRead"/>
         ///     value must be <see langword="true"/>.</param>
+        /// <param name="bufferSize">The size of the writer's internal byte buffer.</param>
         /// <exception cref="ArgumentException"><paramref name="baseStream"/> cannot be written to,.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="baseStream"/> is null.</exception>
-        public ByteWriter(Stream baseStream)
+        public ByteWriter(Stream baseStream, int bufferSize = 8192)
         {
             BaseStream = baseStream ?? throw new ArgumentNullException(nameof(baseStream));
             if (!BaseStream.CanWrite)
                 throw new ArgumentException("Base stream must be able to be written to!", nameof(baseStream));
+
+            if (bufferSize < 0)
+                throw new ArgumentException("Must be > 0!", nameof(bufferSize));
+            Buffer = new byte[bufferSize];
         }
         
         /// <summary>
@@ -158,54 +145,37 @@ namespace HotLib.IO
         }
 
         /// <summary>
-        /// Converts an unmanaged value to bytes, and then stores them in the
-        /// internal byte buffer to be later written to the base stream.
+        /// Converts an unmanaged value to bytes, and then stores them in the internal byte
+        /// buffer to be later written to the base stream, using the system's endianness.
+        /// If <see cref="AutoFlush"/> is <see langword="true"/>, the buffer will be flushed before returning.
+        /// </summary>
+        /// <typeparam name="T">The type of value to write the bytes from. Must be unmanaged.</typeparam>
+        /// <param name="value">The value to write the bytes from.</param>
+        /// <returns>The total number of bytes written.</returns>
+        /// <exception cref="ObjectDisposedException">The writer and/or base stream has been disposed.</exception>
+        public unsafe virtual int Write<T>(T value)
+            where T : unmanaged
+        {
+            return Write((byte*)&value, sizeof(T));
+        }
+
+        /// <summary>
+        /// Converts an unmanaged value to bytes, and then stores them in the internal byte
+        /// buffer to be later written to the base stream, using the given endiannes.
         /// If <see cref="AutoFlush"/> is <see langword="true"/>, the buffer will be flushed before returning.
         /// </summary>
         /// <typeparam name="T">The type of value to write the bytes from. Must be unmanaged.</typeparam>
         /// <param name="value">The value to write the bytes from.</param>
         /// <param name="endianness">The endianness to use when writing the bytes from the value. If it
-        ///     doesn't match the system's endianness, the given bytes will be used in reverse order to
-        ///     create the value, such that the endianness of the created value will match the system's.</param>
+        ///     doesn't match the system's endianness, the bytes will be written in reverse order to
+        ///     create the value, such that the endianness of the created value will match the requested.</param>
         /// <returns>The total number of bytes written.</returns>
         /// <exception cref="ArgumentException"><paramref name="endianness"/> is not defined in <see cref="Endianness"/>.</exception>
         /// <exception cref="ObjectDisposedException">The writer and/or base stream has been disposed.</exception>
         public unsafe virtual int Write<T>(T value, Endianness endianness)
             where T : unmanaged
         {
-            if (IsDisposed)
-                throw new ObjectDisposedException(null);
-
-            var ptr = (byte*)&value;
-
-            bool MatchesSystemEndianness()
-            {
-                try
-                {
-                    return endianness.MatchesSystemEndianness();
-                }
-                catch (ArgumentException e) when (!System.Diagnostics.Debugger.IsAttached)
-                {
-                    // Repackage so we can make sure that the parameter name is correct
-                    throw new ArgumentException(e.Message, nameof(endianness), e);
-                }
-            }
-
-            if (MatchesSystemEndianness())
-            {
-                for (var i = 0; i < sizeof(T); i++)
-                    WriteByteInternal(ptr[i]);
-            }
-            else
-            {
-                for (var i = 0; i < sizeof(T); i++)
-                    WriteByteInternal(ptr[sizeof(T) - i - 1]);
-            }
-
-            if (AutoFlush)
-                Flush();
-
-            return sizeof(T);
+            return Write((byte*)&value, sizeof(T), endianness);
         }
 
         /// <summary>
@@ -302,7 +272,8 @@ namespace HotLib.IO
         }
 
         /// <summary>
-        /// Writes the bytes from a pointer into the internal buffer to be later written to the base stream.
+        /// Writes the bytes from a pointer into the internal buffer to be later
+        /// written to the base stream, using the system's endianness.
         /// If <see cref="AutoFlush"/> is <see langword="true"/>, the buffer will be flushed before returning.
         /// </summary>
         /// <param name="bytes">The pointer to the bytes to write.</param>
@@ -317,11 +288,79 @@ namespace HotLib.IO
             if (count < 0)
                 throw new ArgumentOutOfRangeException("Must be >= 0", nameof(count));
 
-            for (var offset = 0; offset < count; offset++)
-                WriteByteInternal(bytes[offset]);
+            WritePointerInternal(bytes, count, false);
 
             if (AutoFlush)
                 Flush();
+
+            return count;
+        }
+
+        /// <summary>
+        /// Writes the bytes from a pointer into the internal buffer to be later
+        /// written to the base stream, using the given endiannes.
+        /// If <see cref="AutoFlush"/> is <see langword="true"/>, the buffer will be flushed before returning.
+        /// </summary>
+        /// <param name="bytes">The pointer to the bytes to write.</param>
+        /// <param name="count">The number of bytes to write from the pointer.</param>
+        /// <param name="endianness">The endianness to use when writing the bytes from the pointer. If it
+        ///     doesn't match the system's endianness, the bytes will be written in reverse order, such 
+        ///     that the endianness of the created value will match the requested.</param>
+        /// <returns>The number of bytes written.</returns>
+        /// <exception cref="ArgumentException"><paramref name="endianness"/> is not defined in <see cref="Endianness"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="count"/> is negative.</exception>
+        /// <exception cref="ObjectDisposedException">The writer and/or base stream has been disposed.</exception>
+        public unsafe virtual int Write(byte* bytes, int count, Endianness endianness)
+        {
+            if (IsDisposed)
+                throw new ObjectDisposedException(null);
+            if (count < 0)
+                throw new ArgumentOutOfRangeException("Must be >= 0", nameof(count));
+
+            bool MatchesSystemEndianness()
+            {
+                try
+                {
+                    return endianness.MatchesSystemEndianness();
+                }
+                catch (ArgumentException e) when (!System.Diagnostics.Debugger.IsAttached)
+                {
+                    // Repackage so we can make sure that the parameter name is correct
+                    throw new ArgumentException(e.Message, nameof(endianness), e);
+                }
+            }
+
+            WritePointerInternal(bytes, count, !MatchesSystemEndianness());
+
+            if (AutoFlush)
+                Flush();
+
+            return count;
+        }
+
+
+        /// <summary>
+        /// Writes the bytes from a pointer into the internal buffer to be later written to the base stream.
+        /// Increments <see cref="BufferIndex"/>, and flushes when the buffer gets full.
+        /// Assumes no checking necessary for args or state (e.g. <see cref="IsDisposed"/>).
+        /// Ignores <see cref="AutoFlush"/>.
+        /// </summary>
+        /// <param name="bytes">The pointer to the bytes to write.</param>
+        /// <param name="count">The number of bytes to write from the pointer.</param>
+        /// <param name="swapEndianness">Whether or not to swap the endianness of the bytes when writing.</param>
+        /// <returns>The number of bytes written.</returns>
+        protected unsafe virtual int WritePointerInternal(byte* bytes, int count, bool swapEndianness)
+        {
+            if (swapEndianness)
+            {
+                for (var offset = 0; offset < count; offset++)
+                    WriteByteInternal(bytes[count - 1 - offset]);
+            }
+            else
+            {
+                for (var offset = 0; offset < count; offset++)
+                    WriteByteInternal(bytes[offset]);
+            }
 
             return count;
         }
