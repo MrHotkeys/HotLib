@@ -76,7 +76,7 @@ namespace HotLib.Bits.Enumerable
                 Enumerable = enumerable ?? throw new ArgumentNullException(nameof(enumerable));
 
                 BytesEnumerator = enumerable.Bytes.GetEnumerator();
-                BytesEnumerator.MoveNext(); // This needs to be ready to go with good data for MoveNext()
+                CurrentByteOffset = 8;
             }
 
             /// <summary>

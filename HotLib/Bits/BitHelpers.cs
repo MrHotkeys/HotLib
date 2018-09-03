@@ -68,7 +68,7 @@ namespace HotLib.Bits
         /// <summary>
         /// Gets a byte containing a bit mask of the given size, dressed to the right (least significant end).
         /// </summary>
-        /// <param name="maskSize">The size of the mask to get.</param>
+        /// <param name="maskSize">The size of the mask to get, in bits.</param>
         /// <returns>The created mask.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="maskSize"/>
         ///     is less than 0 or greater than 8.</exception>
@@ -92,7 +92,7 @@ namespace HotLib.Bits
         /// <summary>
         /// Gets a <see cref="UInt16"/> containing a bit mask of the given size, dressed to the right (least significant end).
         /// </summary>
-        /// <param name="maskSize">The size of the mask to get.</param>
+        /// <param name="maskSize">The size of the mask to get, in bits.</param>
         /// <returns>The created mask.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="maskSize"/>
         ///     is less than 0 or greater than 16.</exception>
@@ -122,9 +122,41 @@ namespace HotLib.Bits
         }
 
         /// <summary>
+        /// Gets a <see cref="UInt16"/> containing a bit mask of the given size, dressed to the left (most significant end).
+        /// </summary>
+        /// <param name="maskSize">The size of the mask to get, in bits.</param>
+        /// <returns>The created mask.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="maskSize"/>
+        ///     is less than 0 or greater than 16.</exception>
+        public static ushort GetLeftMaskUInt16(int maskSize)
+        {
+            switch (maskSize)
+            {
+                case 00: return 0;
+                case 01: return 0b1000000000000000;
+                case 02: return 0b1100000000000000;
+                case 03: return 0b1110000000000000;
+                case 04: return 0b1111000000000000;
+                case 05: return 0b1111100000000000;
+                case 06: return 0b1111110000000000;
+                case 07: return 0b1111111000000000;
+                case 08: return 0b1111111100000000;
+                case 09: return 0b1111111110000000;
+                case 10: return 0b1111111111000000;
+                case 11: return 0b1111111111100000;
+                case 12: return 0b1111111111110000;
+                case 13: return 0b1111111111111000;
+                case 14: return 0b1111111111111100;
+                case 15: return 0b1111111111111110;
+                case 16: return 0b1111111111111111;
+                default: throw new ArgumentOutOfRangeException("Must be >= 0 and <= 8!", nameof(maskSize));
+            }
+        }
+
+        /// <summary>
         /// Gets a byte containing a bit mask of the given size, dressed to the left (most significant end).
         /// </summary>
-        /// <param name="maskSize">The size of the mask to get.</param>
+        /// <param name="maskSize">The size of the mask to get, in bits.</param>
         /// <returns>The created mask.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="maskSize"/>
         ///     is less than 0 or greater than 8.</exception>
@@ -581,6 +613,16 @@ namespace HotLib.Bits
                 resultPtr[sizeof(T) - byteOffset - 1] = valuePtr[byteOffset];
 
             return *(T*)resultPtr;
+        }
+
+        public static uint MaxValue(int bitCount)
+        {
+            if (bitCount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(bitCount), "Must be > 0!");
+            else if (bitCount > 32)
+                throw new ArgumentOutOfRangeException(nameof(bitCount), "Must be <= 32!");
+            else
+                return (uint)((1L << bitCount) - 1);            
         }
     }
 }
