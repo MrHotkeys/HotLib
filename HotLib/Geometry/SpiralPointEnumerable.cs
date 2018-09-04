@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace HotLib.Math
+namespace HotLib.Geometry
 {
     public struct SpiralPointEnumerable : IEnumerable<(int x, int y)>
     {
