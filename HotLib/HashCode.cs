@@ -7,6 +7,7 @@ namespace HotLib
     /// <see cref="object.GetHashCode"/> implementations. Immutable and
     /// implicitly casts to <see cref="int"/>.
     /// </summary>
+    /// <remarks>From Jon Skeet's StackOverflow answer (https://stackoverflow.com/a/263416)</remarks>
     public struct HashCode
     {
         /// <summary>
