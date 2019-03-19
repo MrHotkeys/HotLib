@@ -16,7 +16,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentNullException"><paramref name="property"/> is null.</exception>
         public static bool IsStatic(this PropertyInfo property)
         {
-            if (property == null)
+            if (property is null)
                 throw new ArgumentNullException(nameof(property));
 
             return property.GetMethod?.IsStatic ??
@@ -30,9 +30,16 @@ namespace HotLib.DotNetExtensions
         /// <param name="property">The property to get the value of.</param>
         /// <param name="target">The target instance containing the property to get the value of.</param>
         /// <param name="useBackingFieldIfNoGetter">If true and the property has no getter, its backing field will be retrieved if it is an auto-property.</param>
-        /// <exception cref="ArgumentException"><paramref name="property"/> is a non-auto property with no getter.</exception>
+        /// <exception cref="ArgumentException"><paramref name="target"/> is null but <paramref name="property"/> is non-static.
+        ///     -or-<paramref name="property"/> is a non-auto property with no getter.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="property"/> is null.</exception>
         public static object GetValue(this PropertyInfo property, object target, bool useBackingFieldIfNoGetter)
         {
+            if (property is null)
+                throw new ArgumentNullException(nameof(property));
+            if (target is null && !property.IsStatic())
+                throw new ArgumentException($"{nameof(target)} cannot be null: {property} is non-static!");
+
             // Make sure our property comes from its declaring type so that all
             // the metadata is there (so we can properly find private getters)
             var targetType = target.GetType();
@@ -70,9 +77,19 @@ namespace HotLib.DotNetExtensions
         /// <param name="target">The target instance containing the property being set.</param>
         /// <param name="value">The value to set the property to.</param>
         /// <param name="useBackingFieldIfNoSetter">If true and the property has no setter, its backing field will be set if it is an auto-property.</param>
-        /// <exception cref="ArgumentException"><paramref name="property"/> is a non-auto property with no setter.</exception>
+        /// <exception cref="ArgumentException"><paramref name="target"/> is null but <paramref name="property"/> is non-static.
+        ///     -or-<paramref name="property"/> is a non-auto property with no setter.
+        ///     -or-<paramref name="property"/> cannot be assigned from <paramref name="value"/> by type.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="property"/> is null.</exception>
         public static void SetValue(this PropertyInfo property, object target, object value, bool useBackingFieldIfNoSetter)
         {
+            if (property is null)
+                throw new ArgumentNullException(nameof(property));
+            if (target is null && !property.IsStatic())
+                throw new ArgumentException($"{nameof(target)} cannot be null: {property} is non-static!");
+            if (!property.PropertyType.IsAssignableFrom(value.GetType()))
+                throw new ArgumentException($"Cannot set {property} with value of type {value.GetType()}!");
+
             // Make sure our property comes from its declaring type so that all
             // the metadata is there (so we can properly find private setters)
             var targetType = target.GetType();
@@ -113,9 +130,9 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentNullException"><paramref name="property"/> or <paramref name="type"/> is null.</exception>
         public static FieldInfo GetBackingField(this PropertyInfo property, Type type)
         {
-            if (property == null)
+            if (property is null)
                 throw new ArgumentNullException(nameof(property));
-            if (type == null)
+            if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
             if (property.DeclaringType.IsInterface)
