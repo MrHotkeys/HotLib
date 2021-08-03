@@ -94,7 +94,7 @@ namespace HotLib
         {
             unchecked
             {
-                var valueHash = EqualityComparer<T>.Default.GetHashCode(value);
+                var valueHash = value is not null ? EqualityComparer<T>.Default.GetHashCode(value) : 0;
                 var fullHash = (Value * 16777619) ^ valueHash;
                 return new HashCode(fullHash);
             }
@@ -111,8 +111,8 @@ namespace HotLib
         {
             unchecked
             {
-                var value1Hash = EqualityComparer<T>.Default.GetHashCode(value1);
-                var value2Hash = EqualityComparer<T>.Default.GetHashCode(value2);
+                var value1Hash = value1 is not null ? EqualityComparer<T>.Default.GetHashCode(value1) : 0;
+                var value2Hash = value2 is not null ? EqualityComparer<T>.Default.GetHashCode(value2) : 0;
                 var fullHash = (Value * 16777619) ^ value1Hash;
                 fullHash = (fullHash * 16777619) ^ value2Hash;
                 return new HashCode(fullHash);
@@ -131,9 +131,9 @@ namespace HotLib
         {
             unchecked
             {
-                var value1Hash = EqualityComparer<T>.Default.GetHashCode(value1);
-                var value2Hash = EqualityComparer<T>.Default.GetHashCode(value2);
-                var value3Hash = EqualityComparer<T>.Default.GetHashCode(value3);
+                var value1Hash = value1 is not null ? EqualityComparer<T>.Default.GetHashCode(value1) : 0;
+                var value2Hash = value2 is not null ? EqualityComparer<T>.Default.GetHashCode(value2) : 0;
+                var value3Hash = value3 is not null ? EqualityComparer<T>.Default.GetHashCode(value3) : 0;
                 var fullHash = (Value * 16777619) ^ value1Hash;
                 fullHash = (fullHash * 16777619) ^ value2Hash;
                 fullHash = (fullHash * 16777619) ^ value3Hash;
@@ -154,10 +154,10 @@ namespace HotLib
         {
             unchecked
             {
-                var value1Hash = EqualityComparer<T>.Default.GetHashCode(value1);
-                var value2Hash = EqualityComparer<T>.Default.GetHashCode(value2);
-                var value3Hash = EqualityComparer<T>.Default.GetHashCode(value3);
-                var value4Hash = EqualityComparer<T>.Default.GetHashCode(value4);
+                var value1Hash = value1 is not null ? EqualityComparer<T>.Default.GetHashCode(value1) : 0;
+                var value2Hash = value2 is not null ? EqualityComparer<T>.Default.GetHashCode(value2) : 0;
+                var value3Hash = value3 is not null ? EqualityComparer<T>.Default.GetHashCode(value3) : 0;
+                var value4Hash = value4 is not null ? EqualityComparer<T>.Default.GetHashCode(value4) : 0;
                 var fullHash = (Value * 16777619) ^ value1Hash;
                 fullHash = (fullHash * 16777619) ^ value2Hash;
                 fullHash = (fullHash * 16777619) ^ value3Hash;
@@ -180,11 +180,11 @@ namespace HotLib
         {
             unchecked
             {
-                var value1Hash = EqualityComparer<T>.Default.GetHashCode(value1);
-                var value2Hash = EqualityComparer<T>.Default.GetHashCode(value2);
-                var value3Hash = EqualityComparer<T>.Default.GetHashCode(value3);
-                var value4Hash = EqualityComparer<T>.Default.GetHashCode(value4);
-                var value5Hash = EqualityComparer<T>.Default.GetHashCode(value5);
+                var value1Hash = value1 is not null ? EqualityComparer<T>.Default.GetHashCode(value1) : 0;
+                var value2Hash = value2 is not null ? EqualityComparer<T>.Default.GetHashCode(value2) : 0;
+                var value3Hash = value3 is not null ? EqualityComparer<T>.Default.GetHashCode(value3) : 0;
+                var value4Hash = value4 is not null ? EqualityComparer<T>.Default.GetHashCode(value4) : 0;
+                var value5Hash = value5 is not null ? EqualityComparer<T>.Default.GetHashCode(value5) : 0;
                 var fullHash = (Value * 16777619) ^ value1Hash;
                 fullHash = (fullHash * 16777619) ^ value2Hash;
                 fullHash = (fullHash * 16777619) ^ value3Hash;

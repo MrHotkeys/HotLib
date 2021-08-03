@@ -69,7 +69,7 @@ namespace HotLib.DotNetExtensions
         ///     value for <typeparamref name="T"/> if no items or too many items.</param>
         /// <returns>True if there is a single element, false if there are 0 or 2+ elements.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
-        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, out T single)
+        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, out T? single)
         {
             if (enumerable == null)
                 throw new ArgumentNullException(nameof(enumerable));
@@ -100,7 +100,7 @@ namespace HotLib.DotNetExtensions
         ///     value for <typeparamref name="T"/> if no items or too many items.</param>
         /// <returns>True if there is a single element, false if there are 0 or 2+ elements.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
-        public static bool TryGetSingleOrDefault<T>(this IEnumerable<T> enumerable, out T single)
+        public static bool TryGetSingleOrDefault<T>(this IEnumerable<T> enumerable, out T? single)
         {
             if (enumerable == null)
                 throw new ArgumentNullException(nameof(enumerable));
@@ -138,7 +138,7 @@ namespace HotLib.DotNetExtensions
         ///     value for <typeparamref name="T"/> if no items.</param>
         /// <returns>True if there is at least one element, false if there are 0 elements.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
-        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, out T first)
+        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, out T? first)
         {
             if (enumerable == null)
                 throw new ArgumentNullException(nameof(enumerable));

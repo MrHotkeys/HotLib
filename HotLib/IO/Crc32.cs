@@ -370,7 +370,7 @@ namespace HotLib.IO
         /// </summary>
         /// <param name="obj">The object to test against.</param>
         /// <returns>True if equal, false if not.</returns>
-        public override bool Equals(object obj) => obj is Crc32 other && Equals(this, other);
+        public override bool Equals(object? obj) => obj is Crc32 other && Equals(this, other);
 
         /// <summary>
         /// Gets a hash code for the <see cref="Crc32"/>.

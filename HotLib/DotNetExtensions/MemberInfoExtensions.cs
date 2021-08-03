@@ -35,7 +35,9 @@ namespace HotLib.DotNetExtensions
                 case ConstructorInfo constructorInfo:
                     return constructorInfo.IsStatic;
                 case EventInfo eventInfo:
-                    return eventInfo.AddMethod.IsStatic;
+                    return eventInfo.AddMethod?.IsStatic ??
+                        eventInfo.RemoveMethod?.IsStatic ??
+                        throw new InvalidOperationException("Cannot determine if event with no add or remove method is static!");
                 case TypeInfo typeInfo:
                     return typeInfo.IsStatic();
                 case Type type:
@@ -78,7 +80,7 @@ namespace HotLib.DotNetExtensions
         /// <returns>The value stored in the member.</returns>
         /// <exception cref="ArgumentException"><paramref name="member"/> is not a field or property.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="member"/> is null.</exception>
-        public static object GetFieldOrPropertyValue(this MemberInfo member, object target)
+        public static object? GetFieldOrPropertyValue(this MemberInfo member, object target)
         {
             if (member == null)
                 throw new ArgumentNullException(nameof(member));
@@ -159,7 +161,7 @@ namespace HotLib.DotNetExtensions
         /// <param name="attribute">The found attribute.</param>
         /// <returns>True if the member has a single matching attribute, false if there are zero matches or more than one.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="member"/> is null.</exception>
-        public static bool TryGetCustomAttribute<T>(this MemberInfo member, out T attribute)
+        public static bool TryGetCustomAttribute<T>(this MemberInfo member, out T? attribute)
         {
             if (member == null)
                 throw new ArgumentNullException(nameof(member));

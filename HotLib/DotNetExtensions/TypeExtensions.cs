@@ -82,7 +82,7 @@ namespace HotLib.DotNetExtensions
         /// <param name="type">The type to get the default value for.</param>
         /// <returns>The default value for the given type.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="type"/> is null.</exception>
-        public static object GetDefault(this Type type)
+        public static object? GetDefault(this Type type)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));

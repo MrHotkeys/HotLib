@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -80,7 +81,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentNullException"><paramref name="customAttributeProvider"/> or
         ///     <paramref name="attributeType"/> is null.</exception>
         public static bool TryGetCustomAttribute(this ICustomAttributeProvider customAttributeProvider,
-                                                 Type attributeType, out Attribute attribute)
+                                                 Type attributeType, [NotNullWhen(true)] out Attribute? attribute)
         {
             return customAttributeProvider.TryGetCustomAttribute(attributeType, true, out attribute);
         }
@@ -96,7 +97,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentNullException"><paramref name="customAttributeProvider"/> or
         ///     <paramref name="attributeType"/> is null.</exception>
         public static bool TryGetCustomAttribute(this ICustomAttributeProvider customAttributeProvider,
-                                                 Type attributeType, bool inherit, out Attribute attribute)
+                                                 Type attributeType, bool inherit, [NotNullWhen(true)] out Attribute? attribute)
         {
             if (customAttributeProvider == null)
                 throw new ArgumentNullException(nameof(customAttributeProvider));
@@ -104,7 +105,7 @@ namespace HotLib.DotNetExtensions
                 throw new ArgumentNullException(nameof(attributeType));
 
             var matches = customAttributeProvider.GetCustomAttributes(attributeType, inherit);
-            attribute = (Attribute)matches.FirstOrDefault();
+            attribute = (Attribute?)matches.FirstOrDefault();
             return matches.HasSingle();
         }
 
@@ -116,9 +117,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="attribute">The found attribute.</param>
         /// <returns>True if there is a single matching attribute, false if there are zero matches or more than one.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="customAttributeProvider"/> is null.</exception>
-        public static bool TryGetCustomAttribute<T>(this ICustomAttributeProvider customAttributeProvider, out T attribute)
+        public static bool TryGetCustomAttribute<T>(this ICustomAttributeProvider customAttributeProvider, out T? attribute)
         {
-            return customAttributeProvider.TryGetCustomAttribute<T>(true, out attribute);
+            return customAttributeProvider.TryGetCustomAttribute(true, out attribute);
         }
 
         /// <summary>
@@ -130,14 +131,13 @@ namespace HotLib.DotNetExtensions
         /// <param name="attribute">The found attribute.</param>
         /// <returns>True if there is a single matching attribute, false if there are zero matches or more than one.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="customAttributeProvider"/> is null.</exception>
-        public static bool TryGetCustomAttribute<T>(this ICustomAttributeProvider customAttributeProvider, bool inherit, out T attribute)
+        public static bool TryGetCustomAttribute<T>(this ICustomAttributeProvider customAttributeProvider, bool inherit, out T? attribute)
         {
             if (customAttributeProvider == null)
                 throw new ArgumentNullException(nameof(customAttributeProvider));
 
-            var matches = customAttributeProvider.GetCustomAttributes(typeof(T), inherit)
-                                                 .Cast<T>();
-            attribute = matches.FirstOrDefault();
+            var matches = customAttributeProvider.GetCustomAttributes(typeof(T), inherit);
+            attribute = (T?)matches.FirstOrDefault();
             return matches.HasSingle();
         }
 

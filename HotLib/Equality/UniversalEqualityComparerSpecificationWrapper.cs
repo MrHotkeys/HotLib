@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
 
 namespace HotLib.Equality
@@ -30,13 +31,13 @@ namespace HotLib.Equality
         /// <param name="x">The first object to compare.</param>
         /// <param name="y">The second object to compare.</param>
         /// <returns><see langword="true"/> if the objects are equal, <see langword="false"/> if not.</returns>
-        public bool Equals(T x, T y) => Comparer.Equals(x, y);
+        public bool Equals(T? x, T? y) => Comparer.Equals(x, y);
 
         /// <summary>
         /// Uses the wrapped <see cref="IUniversalEqualityComparer"/> to generate a hash code for an object.
         /// </summary>
         /// <param name="obj">The object to get a hash code for.</param>
         /// <returns>The object's hash code.</returns>
-        public int GetHashCode(T obj) => Comparer.GetHashCode(obj);
+        public int GetHashCode([DisallowNull] T obj) => Comparer.GetHashCode(obj);
     }
 }

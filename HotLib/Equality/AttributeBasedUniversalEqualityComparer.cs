@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -116,7 +117,7 @@ namespace HotLib.Equality
         /// <exception cref="InvalidOperationException"><paramref name="includeInherited"/> is false, but there
         ///     are no declared members marked with <see cref="IncludeAttribute"/>.</exception>
         public virtual bool Equals<T>(T x, T y, bool includeInherited = true,
-                                      IUniversalEqualityComparer equalityComparer = null)
+                                      IUniversalEqualityComparer? equalityComparer = null)
         {
             if (x == null)
                 return y == null;
@@ -143,7 +144,7 @@ namespace HotLib.Equality
         /// <param name="x">The first object to compare.</param>
         /// <param name="y">The second object to compare.</param>
         /// <returns><see langword="true"/> if the objects are equal, <see langword="false"/> if not.</returns>
-        bool IUniversalEqualityComparer.Equals<T>(T x, T y) => Equals(x, y);
+        bool IUniversalEqualityComparer.Equals<T>([AllowNull] T x, [AllowNull] T y) => Equals(x, y);
 
         /// <summary>
         /// Gets the <see cref="EqualityFunction{T}"/> for the given type. If it has not already been created,
@@ -160,7 +161,7 @@ namespace HotLib.Equality
             }
             else
             {
-                return boxedEqualityFunction as EqualityFunction<T>;
+                return (EqualityFunction<T>)boxedEqualityFunction;
             }
         }
 
@@ -178,7 +179,7 @@ namespace HotLib.Equality
         ///     are no declared members marked with <see cref="IncludeAttribute"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="target"/> is null.</exception>
         public virtual int GetHashCode<T>(T target, bool includeInherited = true,
-                                          IUniversalEqualityComparer equalityComparer = null)
+                                          IUniversalEqualityComparer? equalityComparer = null)
         {
             if (target == null)
                 throw new ArgumentNullException(nameof(target));
@@ -219,7 +220,7 @@ namespace HotLib.Equality
             }
             else
             {
-                return boxedHashCodeFunction as HashCodeFunction<T>;
+                return (HashCodeFunction<T>)boxedHashCodeFunction;
             }
         }
 
@@ -257,7 +258,7 @@ namespace HotLib.Equality
                                                  .ToArray();
 
                 var inheritedSet = new HashSet<MemberInfo>();
-                var currentType = typeof(T).BaseType;
+                var currentType = typeof(T).BaseType!; // We know we're not null since currentType is not object
                 while (currentType != typeof(object))
                 {
                     var membersWithAttribute = currentType.GetMembers(BindingFlags.DeclaredOnly | BindingFlags.Public |
@@ -303,7 +304,7 @@ namespace HotLib.Equality
                         }
                     }
 
-                    currentType = currentType.BaseType;
+                    currentType = currentType.BaseType!; // We know we're not null since currentType is not object
                 }
 
                 inherited = inheritedSet.ToArray();

@@ -55,8 +55,10 @@ namespace HotLib.DotNetExtensions
                 throw new ArgumentException($"Incorrect number of dimension sizes (expected {source.Rank}, got {dimensionSizes.Length})!");
             if (dimensionSizes.Any(s => s <= 0))
                 throw new ArgumentException("A dimension size cannot be non-positive!");
-            
-            var target = Array.CreateInstance(source.GetType().GetElementType(), dimensionSizes);
+
+            var target = Array.CreateInstance(
+                source.GetType().GetElementType()!, // We know this won't be null since it comes from an array
+                dimensionSizes);
             
             var indices = new int[source.Rank];
             CopyRecursivelyAtDimension(0);

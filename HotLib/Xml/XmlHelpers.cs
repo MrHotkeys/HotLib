@@ -15,12 +15,15 @@ namespace HotLib.Helpers
         /// <param name="node">The node to get the source file for.</param>
         /// <returns>The source file path, or null.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="node"/> is null.</exception>
-        public static string GetSourceFile(XmlNode node)
+        public static string? GetSourceFile(XmlNode node)
         {
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
 
-            var uri = new Uri(node.OwnerDocument.BaseURI);
+            if (node is not XmlDocument document)
+                document = node.OwnerDocument!;
+
+            var uri = new Uri(document.BaseURI);
             if (uri.IsFile)
                 return uri.LocalPath;
             else
@@ -36,13 +39,17 @@ namespace HotLib.Helpers
         /// <exception cref="ArgumentNullException"><paramref name="node"/> is null.</exception>
         public static XmlElement FindRootChildParent(XmlNode node)
         {
-            if (node == null)
+            if (node is null)
                 throw new ArgumentNullException(nameof(node));
+            if (node.ParentNode is null)
+                throw new ArgumentException("Given node has no parent!", nameof(node));
 
             if (node.NodeType == XmlNodeType.Document || node.ParentNode.NodeType == XmlNodeType.Document)
-            {
                 throw new ArgumentException("Given node is the document node or a document root node!");
-            }
+
+            if (node.ParentNode.ParentNode is null)
+                throw new InvalidOperationException("Give node's parent is not the document node, but it has no parent (malformed xml?)!");
+
             if (node.ParentNode.ParentNode.NodeType == XmlNodeType.Document)
             {
                 if (node.NodeType == XmlNodeType.Element)
@@ -56,6 +63,9 @@ namespace HotLib.Helpers
                 do
                 {
                     current = current.ParentNode;
+
+                    if (current.ParentNode is null || current.ParentNode.ParentNode is null)
+                        throw new InvalidOperationException("Ran out of nodes to traverse without finding document node (malformed xml?)!");
                 }
                 while (current.ParentNode.ParentNode.NodeType != XmlNodeType.Document);
                 return (XmlElement)current;

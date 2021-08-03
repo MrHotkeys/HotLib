@@ -96,7 +96,7 @@ namespace HotLib.IO
                 throw new ArgumentNullException(nameof(destinations));
             if (destinations.Length == 0)
                 throw new ArgumentException("Need at least one destination stream!", nameof(destinations));
-            if (destinations.Contains(null))
+            if (destinations.Any(s => s is null))
                 throw new ArgumentException("Stream array cannot contain null!");
 
             Buffer = new byte[bufferSize];

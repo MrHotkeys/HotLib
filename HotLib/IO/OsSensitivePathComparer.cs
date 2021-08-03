@@ -34,7 +34,7 @@ namespace HotLib.IO
         /// <param name="pathB">The second path.</param>
         /// <returns>True if equal, false if not.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="pathA"/> or <paramref name="pathB"/> is null.</exception>
-        public virtual bool Equals(string pathA, string pathB)
+        public virtual bool Equals(string? pathA, string? pathB)
         {
             if (pathA == null)
                 throw new ArgumentNullException(nameof(pathA));

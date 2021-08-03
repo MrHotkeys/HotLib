@@ -96,7 +96,7 @@ namespace HotLib.Collections
             /// <summary>
             /// The item in the container.
             /// </summary>
-            public T Item;
+            public T? Item;
             /// <summary>
             /// Whether or not the container is filled with an item.
             /// </summary>
@@ -155,7 +155,7 @@ namespace HotLib.Collections
         /// <param name="id">The ID of the item to get.</param>
         /// <returns>Gets the item with the given ID.</returns>
         /// <exception cref="ArgumentException">No item exists in the table under the given ID.</exception>
-        public virtual T this[int id] => GetContainer(id, true).Item;
+        public virtual T this[int id] => GetContainer(id, true).Item!; // We know it won't be null since we're passing true for enforceFilled
 
         /// <summary>
         /// Adds an item to the table. Returns the ID of the item in the table.
@@ -265,7 +265,7 @@ namespace HotLib.Collections
         /// Gets the container for the given ID.
         /// </summary>
         /// <param name="id">The ID to get the container for.</param>
-        /// <param name="enforceFilled">If true, a <see cref="ArgumentException"/>
+        /// <param name="enforceFilled">If true, an <see cref="ArgumentException"/>
         ///     will be thrown if the container is empty.</param>
         /// <returns>The container for the given ID.</returns>
         /// <exception cref="ArgumentException">No item exists in the table under the given ID.</exception>

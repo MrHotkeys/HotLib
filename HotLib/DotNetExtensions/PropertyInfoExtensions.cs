@@ -33,22 +33,14 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="target"/> is null but <paramref name="property"/> is non-static.
         ///     -or-<paramref name="property"/> is a non-auto property with no getter.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="property"/> is null.</exception>
-        public static object GetValue(this PropertyInfo property, object target, bool useBackingFieldIfNoGetter)
+        public static object? GetValue(this PropertyInfo property, object target, bool useBackingFieldIfNoGetter)
         {
             if (property is null)
                 throw new ArgumentNullException(nameof(property));
             if (target is null && !property.IsStatic())
                 throw new ArgumentException($"{nameof(target)} cannot be null: {property} is non-static!");
 
-            // Make sure our property comes from its declaring type so that all
-            // the metadata is there (so we can properly find private getters)
-            var targetType = target.GetType();
-            if (property.DeclaringType != targetType)
-            {
-                property = property.DeclaringType
-                                   .GetProperty(property.Name, BindingFlags.Public | BindingFlags.NonPublic |
-                                                               BindingFlags.Instance | BindingFlags.Static);
-            }
+            EnsurePropertyIsAsDeclared(ref property, target);
 
             var getter = property.GetGetMethod(true);
             if (getter != null)
@@ -57,7 +49,7 @@ namespace HotLib.DotNetExtensions
             }
             else if (useBackingFieldIfNoGetter)
             {
-                var backingField = property.GetBackingField(targetType);
+                var backingField = property.GetBackingField(target);
 
                 if (backingField != null)
                     return backingField.GetValue(target);
@@ -90,15 +82,7 @@ namespace HotLib.DotNetExtensions
             if (!property.PropertyType.IsAssignableFrom(value.GetType()))
                 throw new ArgumentException($"Cannot set {property} with value of type {value.GetType()}!");
 
-            // Make sure our property comes from its declaring type so that all
-            // the metadata is there (so we can properly find private setters)
-            var targetType = target.GetType();
-            if (property.DeclaringType != targetType)
-            {
-                property = property.DeclaringType
-                                   .GetProperty(property.Name, BindingFlags.Public | BindingFlags.NonPublic |
-                                                               BindingFlags.Instance | BindingFlags.Static);
-            }
+            EnsurePropertyIsAsDeclared(ref property, target);
 
             var setter = property.GetSetMethod(true);
 
@@ -108,7 +92,7 @@ namespace HotLib.DotNetExtensions
             }
             else if (useBackingFieldIfNoSetter)
             {
-                var backingField = property.GetBackingField(targetType);
+                var backingField = property.GetBackingField(target);
 
                 if (backingField != null)
                     backingField.SetValue(target, value);
@@ -121,6 +105,41 @@ namespace HotLib.DotNetExtensions
             }
         }
 
+        private static void EnsurePropertyIsAsDeclared(ref PropertyInfo property, object? target)
+        {
+            // Make sure our property comes from its declaring type so that all
+            // the metadata is there (so we can properly find private setters)
+            if (target is not null)
+            {
+                var targetType = target.GetType();
+                if (property.DeclaringType != targetType)
+                {
+                    if (property.DeclaringType is null)
+                        throw new InvalidOperationException($"Cannot get declaring type of {property}!");
+
+                    if (!property.DeclaringType.IsAssignableFrom(targetType))
+                        throw new ArgumentException($"{targetType} does not contain property {property}!", nameof(property));
+
+                    property = property
+                        .DeclaringType
+                        .GetProperty(
+                            property.Name,
+                            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
+                        ?? throw new InvalidOperationException();
+                }
+            }
+        }
+
+        private static FieldInfo? GetBackingField(this PropertyInfo property, object? target)
+        {
+            var backingFieldTargetType =
+                target?.GetType() ??
+                property.DeclaringType ??
+                throw new InvalidOperationException($"Cannot get declaring type of {property}!");
+
+            return property.GetBackingField(backingFieldTargetType);
+        }
+
         /// <summary>
         /// Gets the backing field for an auto-property.
         /// </summary>
@@ -128,12 +147,15 @@ namespace HotLib.DotNetExtensions
         /// <param name="type">The <see cref="Type"/> implementing the property.</param>
         /// <returns>The property's backing field, or null if no backing field found.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="property"/> or <paramref name="type"/> is null.</exception>
-        public static FieldInfo GetBackingField(this PropertyInfo property, Type type)
+        public static FieldInfo? GetBackingField(this PropertyInfo property, Type type)
         {
             if (property is null)
                 throw new ArgumentNullException(nameof(property));
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
+
+            if (property.DeclaringType is null)
+                throw new ArgumentException("Cannot get backing field for global types!", nameof(type));
 
             if (property.DeclaringType.IsInterface)
             {
@@ -146,6 +168,9 @@ namespace HotLib.DotNetExtensions
                 else
                 {
                     // Property is explicitly implemented
+                    if (property.DeclaringType.FullName is null)
+                        throw new InvalidOperationException("Cannot get backing field for type with no FullName!");
+
                     var backingFieldName = $"<{property.DeclaringType.FullName.Replace('+', '.')}.{property.Name}>k__BackingField";
                     return type.GetField(backingFieldName, BindingFlags.NonPublic | BindingFlags.Instance);
                 }

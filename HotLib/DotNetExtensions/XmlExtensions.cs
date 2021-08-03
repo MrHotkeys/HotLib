@@ -36,7 +36,7 @@ namespace HotLib.DotNetExtensions
         /// <param name="attribute">Will be set to the attribute if found, or null if not.</param>
         /// <returns><see langword="true"/> if the attribute is found, <see langword="false"/> if not.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="attributes"/> or <paramref name="name"/> is null.</exception>
-        public static bool TryGetAttribute(this XmlAttributeCollection attributes, string name, out XmlAttribute attribute)
+        public static bool TryGetAttribute(this XmlAttributeCollection attributes, string name, out XmlAttribute? attribute)
         {
             if (attributes == null)
                 throw new ArgumentNullException(nameof(attributes));

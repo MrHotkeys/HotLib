@@ -121,6 +121,9 @@ namespace HotLib.Equality
         {
             foreach (var member in members)
             {
+                if (member.DeclaringType is null)
+                    throw new InvalidOperationException();
+
                 // Represents the target objects, as unboxed from the parameter to their actual type
                 // We unbox here since we can unbox to the member's declaring type to be able to find hidden members
                 var x_targetExpression = member.DeclaringType != typeof(T) ?
@@ -137,8 +140,10 @@ namespace HotLib.Equality
                 // MethodInfo for IUniversalEqualityComparer.Equals<T>(T x, T y)
                 var memberValueType = member.GetFieldOrPropertyType();
                 var equalsMethodTypeArgs = new[] { memberValueType };
-                var equalsMethod = typeof(IUniversalEqualityComparer).GetMethod(nameof(IUniversalEqualityComparer.Equals))
-                                                                     .MakeGenericMethod(equalsMethodTypeArgs);
+                var equalsMethod = typeof(IUniversalEqualityComparer)
+                    .GetMethod(nameof(IUniversalEqualityComparer.Equals))
+                    ?.MakeGenericMethod(equalsMethodTypeArgs)
+                    ?? throw new InvalidOperationException();
 
                 // Get the hash for the current member from the default comparer
                 var memberEqualsExpression = Expression.Call(equalityComparerExpression,

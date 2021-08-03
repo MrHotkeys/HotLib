@@ -29,7 +29,7 @@ namespace HotLib.Reflection
         /// <param name="x">The first <see cref="AssemblyName"/> to compare.</param>
         /// <param name="y">The second <see cref="AssemblyName"/> to compare.</param>
         /// <returns>True if equal, false if not.</returns>
-        public static bool Equals(AssemblyName x, AssemblyName y)
+        public static bool Equals(AssemblyName? x, AssemblyName? y)
         {
             if (x == null)
                 return y == null;
@@ -46,7 +46,7 @@ namespace HotLib.Reflection
         /// <param name="x">The first <see cref="AssemblyName"/> to compare.</param>
         /// <param name="y">The second <see cref="AssemblyName"/> to compare.</param>
         /// <returns>True if equal, false if not.</returns>
-        bool IEqualityComparer<AssemblyName>.Equals(AssemblyName x, AssemblyName y) => Equals(x, y);
+        bool IEqualityComparer<AssemblyName>.Equals(AssemblyName? x, AssemblyName? y) => Equals(x, y);
 
         /// <summary>
         /// Gets a hash code for an <see cref="AssemblyName"/> by hashing its full name.

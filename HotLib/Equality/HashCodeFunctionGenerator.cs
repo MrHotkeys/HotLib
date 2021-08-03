@@ -119,6 +119,9 @@ namespace HotLib.Equality
 
             foreach (var member in members)
             {
+                if (member.DeclaringType is null)
+                    throw new InvalidOperationException();
+
                 // Represents the target object, as unboxed from the parameter to its actual type
                 // We unbox here since we can unbox to the member's declaring type to be able to find hidden members
                 var targetExpression = member.DeclaringType != typeof(T) ?
@@ -130,8 +133,10 @@ namespace HotLib.Equality
 
                 // MethodInfo for IUniversalEqualityComparer.GetHashCode<T>(T obj)
                 var getHashCodeTypeParameters = new[] { member.GetFieldOrPropertyType() };
-                var getHashCode = typeof(IUniversalEqualityComparer).GetMethod(nameof(IUniversalEqualityComparer.GetHashCode))
-                                                                    .MakeGenericMethod(getHashCodeTypeParameters);
+                var getHashCode = typeof(IUniversalEqualityComparer)
+                    .GetMethod(nameof(IUniversalEqualityComparer.GetHashCode))
+                    ?.MakeGenericMethod(getHashCodeTypeParameters)
+                    ?? throw new InvalidOperationException();
 
                 // Get the hash for the current member from the default comparer
                 var memberHashExpression = Expression.Call(equalityComparerExpression,
