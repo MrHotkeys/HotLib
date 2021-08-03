@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+using HotLib.DotNetExtensions;
+
 namespace HotLib.Bits
 {
     /// <summary>
@@ -412,37 +414,21 @@ namespace HotLib.Bits
         public unsafe static int GetBytes<T>(T value, Span<byte> bytes, Endianness endianness)
             where T : unmanaged
         {
-            var ptr = (byte*)&value;
+            var valueSpan = new ReadOnlySpan<byte>(&value, sizeof(T));
 
-            try
+            if (valueSpan.Length > bytes.Length)
             {
-                if (endianness.MatchesSystemEndianness())
-                {
-                    for (var i = 0; i < sizeof(T); i++)
-                        bytes[i] = ptr[i];
-
-                    return sizeof(T);
-                }
-                else
-                {
-                    for (var i = 0; i < sizeof(T); i++)
-                        bytes[i] = ptr[sizeof(T) - i - 1];
-
-                    return sizeof(T);
-                }
+                throw new ArgumentException(
+                    $"Given span (length {bytes.Length}) does not contain enough space for the value, need {valueSpan.Length} bytes!",
+                    nameof(bytes));
             }
-            catch (IndexOutOfRangeException e)
-            {
-                if (bytes.Length < sizeof(T))
-                {
-                    throw new ArgumentException($"Not room for all bytes from {typeof(T)} (got {bytes.Length}, " +
-                                                $"expected {sizeof(T)}!", nameof(bytes), e);
-                }
-                else
-                {
-                    throw;
-                }
-            }
+
+            if (endianness.MatchesSystemEndianness())
+                valueSpan.CopyTo(bytes);
+            else
+                valueSpan.CopyToReversed(bytes);
+
+            return valueSpan.Length;
         }
 
         /// <summary>
@@ -458,22 +444,15 @@ namespace HotLib.Bits
         public unsafe static int GetBytes<T>(T value, byte* bytes, Endianness endianness)
             where T : unmanaged
         {
-            var ptr = (byte*)&value;
+            var valueSpan = new ReadOnlySpan<byte>(&value, sizeof(T));
+            var bytesSpan = new Span<byte>(bytes, valueSpan.Length);
 
             if (endianness.MatchesSystemEndianness())
-            {
-                for (var i = 0; i < sizeof(T); i++)
-                    bytes[i] = ptr[i];
-
-                return sizeof(T);
-            }
+                valueSpan.CopyTo(bytesSpan);
             else
-            {
-                for (var i = 0; i < sizeof(T); i++)
-                    bytes[i] = ptr[sizeof(T) - i - 1];
+                valueSpan.CopyToReversed(bytesSpan);
 
-                return sizeof(T);
-            }
+            return valueSpan.Length;
         }
 
         /// <summary>
@@ -481,87 +460,44 @@ namespace HotLib.Bits
         /// </summary>
         /// <typeparam name="T">The type of value to get the bytes of. Must be unmanaged.</typeparam>
         /// <param name="value">The value to get the bytes of.</param>
-        /// <param name="bytes">The array to insert the bytes into.</param>
-        /// <param name="endianness">The intended endianness of the written bytes. If it does not match the
-        /// <returns>The number of bytes inserted into the array.</returns>
-        ///     system's endianness, the bytes will be written in reverse order, such that their endianness
-        ///     will match the requested endianness.</param>
-        /// <exception cref="IndexOutOfRangeException"><paramref name="bytes"/> does not have enough room
-        ///     for all the bytes from <paramref name="value"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="bytes"/> is null.</exception>
-        public unsafe static int GetBytes<T>(T value, byte[] bytes, int offset, Endianness endianness)
-            where T : unmanaged
-        {
-            var ptr = (byte*)&value;
-
-            try
-            {
-                if (endianness.MatchesSystemEndianness())
-                {
-                    for (var i = 0; i < sizeof(T); i++)
-                        bytes[i + offset] = ptr[i];
-
-                    return sizeof(T);
-                }
-                else
-                {
-                    for (var i = 0; i < sizeof(T); i++)
-                        bytes[i + offset] = ptr[sizeof(T) - i - 1];
-
-                    return sizeof(T);
-                }
-            }
-            catch (IndexOutOfRangeException e)
-            {
-                if (bytes.Length < sizeof(T))
-                {
-                    throw new ArgumentException($"No room for all bytes from {typeof(T)} (got {bytes.Length}, " +
-                                                $"expected {sizeof(T)}!", nameof(bytes), e);
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            catch (ArgumentNullException e)
-            {
-                if (bytes == null)
-                    throw new ArgumentNullException(nameof(bytes), e);
-                else
-                    throw;
-            }
-        }
-
-        /// <summary>
-        /// Gets every <see cref="byte"/> from the given unmanaged value and iterates them.
-        /// </summary>
-        /// <typeparam name="T">The type of value to get the bytes of. Must be unmanaged.</typeparam>
-        /// <param name="value">The value to get the bytes of.</param>
+        /// <param name="buffer">The array to insert the bytes into.</param>
+        /// <param name="offset">The offset from the beginning of the buffer at which to start copying.</param>
         /// <param name="endianness">The intended endianness of the written bytes. If it does not match the
         ///     system's endianness, the bytes will be written in reverse order, such that their endianness
         ///     will match the requested endianness.</param>
-        /// <returns>The created enumerable of bytes.</returns>
-        public unsafe static IEnumerable<byte> GetBytes<T>(T value, Endianness endianness)
+        /// <returns>The number of bytes copied.</returns>
+        /// <exception cref="ArgumentException"><paramref name="buffer"/> is not large enough for all the bytes from <paramref name="value"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="offset"/> is negative.
+        ///     -or-<paramref name="offset"/> does not leave enough space in the buffer.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="buffer"/> is null.</exception>
+        public unsafe static int GetBytes<T>(T value, byte[] buffer, int offset, Endianness endianness)
             where T : unmanaged
         {
-            var wrapped = new WrappedPointer<T>(&value);
-            var size = sizeof(T);
+            if (buffer is null)
+                throw new ArgumentNullException(nameof(buffer));
+            if (offset < 0)
+                throw new ArgumentOutOfRangeException(nameof(offset), "Must be >= 0!");
 
-            IEnumerable<byte> Iterate()
+            var valueSpan = new ReadOnlySpan<byte>(&value, sizeof(T));
+            var bufferSpan = buffer.AsSpan(offset);
+
+            if (valueSpan.Length > bufferSpan.Length)
             {
-                if (endianness.MatchesSystemEndianness())
-                {
-                    for (var i = 0; i < size; i++)
-                        yield return wrapped[i];
-                }
-                else
-                {
-                    for (var i = 0; i < size; i++)
-                        yield return wrapped[size - i - 1];
-                }
+                throw buffer.Length >= valueSpan.Length ?
+                    new ArgumentOutOfRangeException( // Buffer big enough, offset too large
+                        nameof(offset),
+                        $"Given offset of {offset} will not provide enough room in the buffer (length {buffer.Length}), need {valueSpan.Length} bytes!") :
+                    new ArgumentException( // Buffer not big enough, no matter the offset
+                        $"Given buffer (length {buffer.Length}) does not contain enough space for the value, need {valueSpan.Length} bytes!",
+                        nameof(buffer));
             }
 
-            return Iterate();
+            if (endianness.MatchesSystemEndianness())
+                valueSpan.CopyTo(bufferSpan);
+            else
+                valueSpan.CopyToReversed(bufferSpan);
+
+            return valueSpan.Length;
         }
 
         /// <summary>
