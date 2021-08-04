@@ -238,6 +238,29 @@ namespace HotLib.DotNetExtensions
         }
 
         /// <summary>
+        /// Applies a projection function over the list, allowing each item to be processed with the knowledge of its corresponding index in the list.
+        /// </summary>
+        /// <remarks>The list is processed in order from beginning (index 0) to end.</remarks>
+        /// <typeparam name="T">The type of item in the list.</typeparam>
+        /// <param name="list">The list of items to enumerate.</param>
+        /// <param name="projection">The projection function to apply to the list.</param>
+        /// <returns>The enumerable of projected values as results of the projection function, in the order the original items appeared in the list.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="list"/> or <paramref name="projection"/> is null.</exception>
+        public static IEnumerable<TProjected> SelectWithIndex<T, TProjected>(this IList<T> list, Func<(int Index, T Item), TProjected> projection)
+        {
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+            if (projection == null)
+                throw new ArgumentNullException(nameof(projection));
+
+            for (var i = 0; i < list.Count; i++)
+            {
+                var tuple = (i, list[i]);
+                yield return projection(tuple);
+            }
+        }
+
+        /// <summary>
         /// Gets an enumerable of <see cref="ValueTuple"/> of each item in the enumerable and an index as
         /// provided by the given index selector. Does not enforce distinctness among the indices.
         /// </summary>
