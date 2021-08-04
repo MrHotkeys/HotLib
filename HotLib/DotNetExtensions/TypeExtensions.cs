@@ -58,7 +58,7 @@ namespace HotLib.DotNetExtensions
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
 
-            return !type.IsValueType || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+            return type.IsClass || Nullable.GetUnderlyingType(type) != null;
         }
 
         /// <summary>
