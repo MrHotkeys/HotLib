@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq.Expressions;
 using System.Reflection;
 
 namespace HotLib.DotNetExtensions
@@ -12,9 +11,14 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="instance">The target object to invoke the method on, or null if the method is static.</param>
         /// <param name="args">The arguments to supply to the method call each time the action is invoked.
+        ///     For no arguments, pass an empty array, or omit any arguments.
         ///     <br/><br/><b>If passing a single <see langword="null"/>, it will need cast as an <see cref="object"/>
         ///     or else it will get implicity cast into a null array!</b></param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
+        ///     number of parameters on the given method.</exception>
+        /// <exception cref="IncompatibleArgumentTypeException">An argument given can't be cast to be compatible with the
+        ///     corresponding parameter in the method signature.</exception>
         /// <exception cref="ArgumentException"><paramref name="instance"/> is null and <paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="args"/> is null.</exception>
         public static Action BuildActionWithSetCall(this MethodInfo method, object? instance, params object?[] args) =>
@@ -33,7 +37,7 @@ namespace HotLib.DotNetExtensions
         ///     <br/><br/>For static methods, see <see cref="BuildActionStatic(MethodInfo)"/>.</param>
         /// <returns>The resulting action.</returns>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="args"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
         public static Action BuildActionWithSetInstance(this MethodInfo method, object instance) =>
             BuildActionWithSetInstance<Action>(method, instance, Type.EmptyTypes);
 
@@ -49,7 +53,7 @@ namespace HotLib.DotNetExtensions
         ///     <br/><br/>For static methods, see <see cref="BuildActionStatic{T}(MethodInfo)"/>.</param>
         /// <returns>The resulting action.</returns>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="args"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
         public static Action<T> BuildActionWithSetInstance<T>(this MethodInfo method, object instance) =>
             BuildActionWithSetInstance<Action<T>>(method, instance, TypeHelpers.TypeArray<T>());
 
@@ -67,7 +71,7 @@ namespace HotLib.DotNetExtensions
         ///     <br/><br/>For static methods, see <see cref="BuildActionStatic{T1, T2}(MethodInfo)"/>.</param>
         /// <returns>The resulting action.</returns>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="args"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
         public static Action<T1, T2> BuildActionWithSetInstance<T1, T2>(this MethodInfo method, object instance) =>
             BuildActionWithSetInstance<Action<T1, T2>>(method, instance, TypeHelpers.TypeArray<T1, T2>());
 
@@ -87,7 +91,7 @@ namespace HotLib.DotNetExtensions
         ///     <br/><br/>For static methods, see <see cref="BuildActionStatic{T1, T2, T3}(MethodInfo)"/>.</param>
         /// <returns>The resulting action.</returns>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="args"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
         public static Action<T1, T2, T3> BuildActionWithSetInstance<T1, T2, T3>(this MethodInfo method, object instance) =>
             BuildActionWithSetInstance<Action<T1, T2, T3>>(method, instance, TypeHelpers.TypeArray<T1, T2, T3>());
 
@@ -109,7 +113,7 @@ namespace HotLib.DotNetExtensions
         ///     <br/><br/>For static methods, see <see cref="BuildActionStatic{T1, T2, T3, T4}(MethodInfo)"/>.</param>
         /// <returns>The resulting action.</returns>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="args"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
         public static Action<T1, T2, T3, T4> BuildActionWithSetInstance<T1, T2, T3, T4>(this MethodInfo method, object instance) =>
             BuildActionWithSetInstance<Action<T1, T2, T3, T4>>(method, instance, TypeHelpers.TypeArray<T1, T2, T3, T4>());
 
@@ -133,15 +137,15 @@ namespace HotLib.DotNetExtensions
         ///     <br/><br/>For static methods, see <see cref="BuildActionStatic{T1, T2, T3, T4, T5}(MethodInfo)"/>.</param>
         /// <returns>The resulting action.</returns>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="args"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
         public static Action<T1, T2, T3, T4, T5> BuildActionWithSetInstance<T1, T2, T3, T4, T5>(this MethodInfo method, object instance) =>
             BuildActionWithSetInstance<Action<T1, T2, T3, T4, T5>>(method, instance, TypeHelpers.TypeArray<T1, T2, T3, T4, T5>());
 
-        private static TAction BuildActionWithSetInstance<TAction>(MethodInfo method, object instance, Type[] paramTypes)
+        private static TAction BuildActionWithSetInstance<TAction>(MethodInfo method, object instance, Type[] parameterTypes)
             where TAction : Delegate =>
             method is null ? throw new ArgumentNullException(nameof(method)) :
             method.IsStatic ? throw new ArgumentException($"Given method may not be static (see {nameof(BuildActionStatic)} for static methods)!", nameof(method)) :
-            BuildDelegateWithSetInstance<TAction>(method, instance, paramTypes);
+            BuildDelegateWithSetInstance<TAction>(method, instance, parameterTypes);
 
         /// <summary>
         /// Builds this method into an <see cref="Action{T}"/> that invokes the method using the argument
