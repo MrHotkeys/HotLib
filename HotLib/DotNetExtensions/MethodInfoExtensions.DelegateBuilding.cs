@@ -15,7 +15,11 @@ namespace HotLib.DotNetExtensions
             public int Actual { get; }
 
             public ArgumentCountMismatchException(MethodInfo method, int expected, int actual)
-                : base($"Incorrect number of parameters given for method {method} (expected {expected}, got {actual})!")
+                : this(method, expected, actual, null)
+            { }
+
+            public ArgumentCountMismatchException(MethodInfo method, int expected, int actual, Exception? innerException)
+                : base($"Incorrect number of parameters given for method {method} (expected {expected}, got {actual})!", innerException)
             {
                 Method = method;
                 Expected = expected;
@@ -30,8 +34,13 @@ namespace HotLib.DotNetExtensions
             public object? Argument { get; }
 
             public IncompatibleArgumentTypeException(MethodInfo method, ParameterInfo parameter, object? argument)
+                : this(method, parameter, argument, null)
+            { }
+
+            public IncompatibleArgumentTypeException(MethodInfo method, ParameterInfo parameter, object? argument, Exception? innerException)
                 : base($"Unable to cast object {argument ?? "NULL"} of type {argument?.GetType()?.ToString() ?? "NULL"} to " +
-                      $"{parameter.ParameterType} for parameter {parameter.Name} at position {parameter.Position} in method {method}!")
+                      $"{parameter.ParameterType} for parameter {parameter.Name} at position {parameter.Position} in method {method}!",
+                      innerException)
             {
                 Method = method;
                 Parameter = parameter;
@@ -46,8 +55,12 @@ namespace HotLib.DotNetExtensions
             public Type ParameterTypeGiven { get; }
 
             public IncompatibleParameterTypeException(MethodInfo method, ParameterInfo parameterActual, Type parameterTypeGiven)
+                : this(method, parameterActual, parameterTypeGiven, null)
+            { }
+
+            public IncompatibleParameterTypeException(MethodInfo method, ParameterInfo parameterActual, Type parameterTypeGiven, Exception? innerException)
                 : base($"Unable to cast parameter of type {parameterTypeGiven} to " +
-                      $"{parameterActual.ParameterType} for parameter {parameterActual.Name} at position {parameterActual.Position} in method {method}!")
+                      $"{parameterActual.ParameterType} for parameter {parameterActual.Name} at position {parameterActual.Position} in method {method}!", innerException)
             {
                 Method = method;
                 ParameterActual = parameterActual;
@@ -62,6 +75,10 @@ namespace HotLib.DotNetExtensions
             public Type Actual { get; }
 
             public IncompatibleReturnTypeException(MethodInfo method, Type expected, Type actual)
+                : this(method, expected, actual, null)
+            { }
+
+            public IncompatibleReturnTypeException(MethodInfo method, Type expected, Type actual, Exception? innerException)
                 : base($"Unable to cast return type {actual} to type {expected} in method {method}!")
             {
                 Method = method;

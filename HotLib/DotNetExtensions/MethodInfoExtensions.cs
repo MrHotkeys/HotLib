@@ -36,6 +36,16 @@ namespace HotLib.DotNetExtensions
             }
         }
 
+        public static TDelegate BuildDelegate<TDelegate>(this MethodInfo method, Action<DelegateBuilding.DelegateBuilder> builderSetup)
+            where TDelegate : Delegate
+        {
+            var builder = new DelegateBuilding.DelegateBuilder(method);
+
+            builderSetup(builder);
+
+            return builder.Build<TDelegate>();
+        }
+
         /// <summary>
         /// Constructs this method with the given types as type parameters. If the method is already constructed, its generic type definition is retrieved and used.
         /// </summary>
