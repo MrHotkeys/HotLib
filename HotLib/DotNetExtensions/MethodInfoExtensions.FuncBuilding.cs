@@ -86,7 +86,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
         public static InstanceMethodFunc<TInstance, TResult> CreateFuncInstanced<TInstance, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            CreateFuncInstanced<InstanceMethodFunc<TInstance, TResult>>(method, builderSetup, typeof(TInstance), Type.EmptyTypes);
+            CreateFuncInstanced<InstanceMethodFunc<TInstance, TResult>>(method, builderSetup, typeof(TInstance), Type.EmptyTypes, typeof(TResult));
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T, TResult}"/> that invokes the method using the argument
@@ -141,7 +141,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
         public static InstanceMethodFunc<TInstance, T, TResult> CreateFuncInstanced<TInstance, T, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            CreateFuncInstanced<InstanceMethodFunc<TInstance, T, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T>());
+            CreateFuncInstanced<InstanceMethodFunc<TInstance, T, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T>(), typeof(TResult));
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T1, T2, TResult}"/> that invokes the method using the argument
@@ -200,7 +200,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
         public static InstanceMethodFunc<TInstance, T1, T2, TResult> CreateFuncInstanced<TInstance, T1, T2, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            CreateFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2>());
+            CreateFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2>(), typeof(TResult));
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T1, T2, T3, TResult}"/> that invokes the method using the argument
@@ -263,7 +263,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
         public static InstanceMethodFunc<TInstance, T1, T2, T3, TResult> CreateFuncInstanced<TInstance, T1, T2, T3, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            CreateFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, T3, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2, T3>());
+            CreateFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, T3, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2, T3>(), typeof(TResult));
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T1, T2, T3, T4, TResult}"/> that invokes the method using the argument
@@ -330,7 +330,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
         public static InstanceMethodFunc<TInstance, T1, T2, T3, T4, TResult> CreateFuncInstanced<TInstance, T1, T2, T3, T4, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            CreateFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, T3, T4, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2, T3, T4>());
+            CreateFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, T3, T4, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2, T3, T4>(), typeof(TResult));
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T1, T2, T3, T4, T5, TResult}"/> that invokes the method using the argument
@@ -401,9 +401,9 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
         public static InstanceMethodFunc<TInstance, T1, T2, T3, T4, T5, TResult> CreateFuncInstanced<TInstance, T1, T2, T3, T4, T5, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            CreateFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, T3, T4, T5, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2, T3, T4, T5>());
+            CreateFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, T3, T4, T5, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2, T3, T4, T5>(), typeof(TResult));
 
-        private static TDelegate CreateFuncInstanced<TDelegate>(MethodInfo method, Action<DelegateBuilder> builderSetup, Type instanceType, Type[] parameterTypes)
+        private static TDelegate CreateFuncInstanced<TDelegate>(MethodInfo method, Action<DelegateBuilder> builderSetup, Type instanceType, Type[] parameterTypes, Type returnType)
             where TDelegate : Delegate =>
             method is null ? throw new ArgumentNullException(nameof(method)) :
             builderSetup is null ? throw new ArgumentNullException(nameof(builderSetup)) :
@@ -412,6 +412,7 @@ namespace HotLib.DotNetExtensions
             {
                 b.UseInstanceParameter(instanceType);
                 b.UseArgumentsFromParameters(parameterTypes);
+                b.UseReturnType(returnType);
 
                 builderSetup(b);
             });
@@ -465,7 +466,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
         public static Func<T, TResult> CreateFuncStatic<T, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            CreateFuncStatic<Func<T, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T>());
+            CreateFuncStatic<Func<T, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T>(), typeof(TResult));
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T1, T2, TResult}"/> that invokes the method statically.
@@ -520,7 +521,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
         public static Func<T1, T2, TResult> CreateFuncStatic<T1, T2, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            CreateFuncStatic<Func<T1, T2, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2>());
+            CreateFuncStatic<Func<T1, T2, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2>(), typeof(TResult));
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T1, T2, T3, TResult}"/> that invokes the method statically.
@@ -579,7 +580,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
         public static Func<T1, T2, T3, TResult> CreateFuncStatic<T1, T2, T3, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            CreateFuncStatic<Func<T1, T2, T3, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2, T3>());
+            CreateFuncStatic<Func<T1, T2, T3, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2, T3>(), typeof(TResult));
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T1, T2, T3, T4, TResult}"/> that invokes the method statically.
@@ -642,7 +643,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
         public static Func<T1, T2, T3, T4, TResult> CreateFuncStatic<T1, T2, T3, T4, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            CreateFuncStatic<Func<T1, T2, T3, T4, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2, T3, T4>());
+            CreateFuncStatic<Func<T1, T2, T3, T4, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2, T3, T4>(), typeof(TResult));
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T1, T2, T3, T4, T5, TResult}"/> that invokes the method statically.
@@ -709,9 +710,9 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
         public static Func<T1, T2, T3, T4, T5, TResult> CreateFuncStatic<T1, T2, T3, T4, T5, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            CreateFuncStatic<Func<T1, T2, T3, T4, T5, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2, T3, T4, T5>());
+            CreateFuncStatic<Func<T1, T2, T3, T4, T5, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2, T3, T4, T5>(), typeof(TResult));
 
-        private static TDelegate CreateFuncStatic<TDelegate>(MethodInfo method, Action<DelegateBuilder> builderSetup, Type[] parameterTypes)
+        private static TDelegate CreateFuncStatic<TDelegate>(MethodInfo method, Action<DelegateBuilder> builderSetup, Type[] parameterTypes, Type returnType)
             where TDelegate : Delegate =>
             method is null ? throw new ArgumentNullException(nameof(method)) :
             builderSetup is null ? throw new ArgumentNullException(nameof(builderSetup)) :
@@ -719,6 +720,7 @@ namespace HotLib.DotNetExtensions
             CreateDelegate<TDelegate>(method, b =>
             {
                 b.UseArgumentsFromParameters(parameterTypes);
+                b.UseReturnType(returnType);
 
                 builderSetup(b);
             });
