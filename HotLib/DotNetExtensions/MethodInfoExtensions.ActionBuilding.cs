@@ -250,8 +250,8 @@ namespace HotLib.DotNetExtensions
             builderSetup is null ? throw new ArgumentNullException(nameof(builderSetup)) :
             BuildDelegate<TDelegate>(method, b =>
             {
-                b.WithInstanceParameter(instanceType);
-                b.WithParameters(parameterTypes);
+                b.UseInstanceParameter(instanceType);
+                b.UseArgumentsFromParameters(parameterTypes);
                 
                 builderSetup(b);
             });
@@ -427,7 +427,7 @@ namespace HotLib.DotNetExtensions
             builderSetup is null ? throw new ArgumentNullException(nameof(builderSetup)) :
             BuildDelegate<TDelegate>(method, b =>
             {
-                b.WithParameters(parameterTypes);
+                b.UseArgumentsFromParameters(parameterTypes);
 
                 builderSetup(b);
             });

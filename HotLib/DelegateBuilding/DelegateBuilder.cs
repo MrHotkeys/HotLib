@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading.Tasks;
 
 using HotLib.DotNetExtensions;
 
 namespace HotLib.DelegateBuilding
 {
-    public partial class DelegateBuilder
+    public class DelegateBuilder
     {
         public MethodInfo Method { get; }
 
@@ -18,66 +15,64 @@ namespace HotLib.DelegateBuilding
 
         protected ParameterExpression[] NonInstanceParameterExpressions { get; set; } = Array.Empty<ParameterExpression>();
 
-        protected IArgumentsBuilder Arguments { get; set; } = ArgumentsBuilderFromNone.Instance;
+        protected IDelegateArgumentsBuilder Arguments { get; set; } = DelegateArgumentsBuilderFromNone.Instance;
 
         protected Type? ReturnType { get; set; }
 
-        protected TypeCheckOptions ArgumentTypeCheck { get; set; } = TypeCheckOptions.AtCompileTime;
+        protected DelegateBuilderTypeCheck ArgumentTypeCheck { get; set; } = DelegateBuilderTypeCheck.AtCompileTime;
 
         public DelegateBuilder(MethodInfo method)
         {
             Method = method;
         }
 
-        public DelegateBuilder WithInstanceValue(object o)
+        /// <summary>
+        /// Builds a delegate with the given object as the instance the method is invoked on. Required for instance methods, but 
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
+        public DelegateBuilder UseInstanceValue(object? o)
         {
-            InstanceExpression = Expression.Constant(o);
+            InstanceExpression = o is null ? null : Expression.Constant(o);
 
             return this;
         }
 
-        public DelegateBuilder WithInstanceParameter(Type type)
+        public DelegateBuilder UseInstanceParameter(Type type)
         {
             InstanceExpression = Expression.Parameter(type, "instance");
 
             return this;
         }
 
-        public DelegateBuilder WithParameters(params Type[] types)
+        public DelegateBuilder UseArgumentsFromParameters(params Type[] types)
         {
             NonInstanceParameterExpressions = types
                 .SelectWithIndex(t => Expression.Parameter(t.Item, $"arg{t.Index}"))
                 .ToArray();
-            Arguments = new ArgumentsBuilderFromParameters(Method, NonInstanceParameterExpressions);
+            Arguments = new DelegateArgumentsBuilderFromParameters(Method, NonInstanceParameterExpressions);
 
             return this;
         }
 
-        public DelegateBuilder WithArguments(params object?[] args)
+        public DelegateBuilder UseArgumentsFromValues(params object?[] args)
         {
             NonInstanceParameterExpressions = Array.Empty<ParameterExpression>();
-            Arguments = new ArgumentsBuilderFromValues(Method, args);
+            Arguments = new DelegateArgumentsBuilderFromValues(Method, args);
 
             return this;
         }
 
-        public DelegateBuilder WithReturnType(Type type)
+        public DelegateBuilder UseReturnType(Type type)
         {
             ReturnType = type;
 
             return this;
         }
 
-        public DelegateBuilder WithArgumentsCheckedAtCallTime()
+        public DelegateBuilder CheckArguments(DelegateBuilderTypeCheck check)
         {
-            ArgumentTypeCheck = TypeCheckOptions.AtCallTime;
-
-            return this;
-        }
-
-        public DelegateBuilder WithArgumentsCheckedAtCompile()
-        {
-            ArgumentTypeCheck = TypeCheckOptions.AtCompileTime;
+            ArgumentTypeCheck = check;
 
             return this;
         }
@@ -108,53 +103,6 @@ namespace HotLib.DelegateBuilding
             return Expression
                 .Lambda<TDelegate>(body, parameterExpressions)
                 .Compile();
-        }
-
-        private Expression[] BuildArgumentExpressions(ParameterExpression[] paramExprs)
-        {
-            var parameters = Method.GetParameters();
-
-            if (parameters.Length != paramExprs.Length)
-                throw new DotNetExtensions.MethodInfoExtensions.ArgumentCountMismatchException(Method, parameters.Length, paramExprs.Length);
-
-            var argExprs = new Expression[paramExprs.Length];
-
-            for (var i = 0; i < paramExprs.Length; i++)
-            {
-                var parameterType = parameters[i].ParameterType;
-                var current = paramExprs[i];
-
-                argExprs[i] =
-                    current.Type == parameterType ? current :
-                    parameterType.IsAssignableFrom(current.Type) ? Expression.Convert(current, parameterType) :
-                    throw new DotNetExtensions.MethodInfoExtensions.IncompatibleParameterTypeException(Method, parameters[i], current.Type);
-            }
-
-            return argExprs;
-        }
-
-        private Expression[] BuildArgumentExpressions(object?[] args)
-        {
-            var parameters = Method.GetParameters();
-
-            if (parameters.Length != args.Length)
-                throw new DotNetExtensions.MethodInfoExtensions.ArgumentCountMismatchException(Method, parameters.Length, args.Length);
-
-            var argExprs = new Expression[args.Length];
-
-            for (var i = 0; i < args.Length; i++)
-            {
-                var parameterType = parameters[i].ParameterType;
-                var current = args[i];
-                var currentExpr = Expression.Constant(args[i]);
-
-                argExprs[i] =
-                    currentExpr.Type == parameterType ? currentExpr :
-                    parameterType.IsAssignableFrom(currentExpr.Type) ? Expression.Convert(currentExpr, parameterType) :
-                    throw new DotNetExtensions.MethodInfoExtensions.IncompatibleArgumentTypeException(Method, parameters[i], current);
-            }
-
-            return argExprs;
         }
     }
 }
