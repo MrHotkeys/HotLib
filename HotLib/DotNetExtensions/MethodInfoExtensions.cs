@@ -58,7 +58,7 @@ namespace HotLib.DotNetExtensions
         ///     corresponding parameter in the method signature.</exception>
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static TDelegate BuildDelegate<TDelegate>(this MethodInfo method, Action<DelegateBuilder> builderSetup)
+        public static TDelegate CreateDelegate<TDelegate>(this MethodInfo method, Action<DelegateBuilder> builderSetup)
             where TDelegate : Delegate
         {
             var builder = new DelegateBuilder(method);

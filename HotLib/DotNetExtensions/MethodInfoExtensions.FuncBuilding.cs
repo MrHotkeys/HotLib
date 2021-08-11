@@ -27,10 +27,10 @@ namespace HotLib.DotNetExtensions
         ///     corresponding parameter in the method signature.</exception>
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
-        public static Func<TResult> BuildFunc<TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
+        public static Func<TResult> CreateFunc<TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
             method is null ? throw new ArgumentNullException(nameof(method)) :
             builderSetup is null ? throw new ArgumentNullException(nameof(builderSetup)) :
-            BuildDelegate<Func<TResult>>(method, b =>
+            CreateDelegate<Func<TResult>>(method, b =>
             {
                 b.UseReturnType(typeof(TResult));
 
@@ -41,7 +41,7 @@ namespace HotLib.DotNetExtensions
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, TResult}"/> that invokes the method using the argument
         /// to the first parameter of the func as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildFunc{TResult}(MethodInfo, Action{DelegateBuilder})"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateFunc{TResult}(MethodInfo, Action{DelegateBuilder})"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="TResult">The type of result returned by the method call. The actual type
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
@@ -59,14 +59,14 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static InstanceMethodFunc<TInstance, TResult> BuildFuncInstanced<TInstance, TResult>(this MethodInfo method) =>
-            BuildFuncInstanced<TInstance, TResult>(method, DelegateBuilderSetupNoOp);
+        public static InstanceMethodFunc<TInstance, TResult> CreateFuncInstanced<TInstance, TResult>(this MethodInfo method) =>
+            CreateFuncInstanced<TInstance, TResult>(method, DelegateBuilderSetupNoOp);
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, TResult}"/> that invokes the method using the argument
         /// to the first parameter of the func as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildFunc{TResult}(MethodInfo, Action{DelegateBuilder})"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateFunc{TResult}(MethodInfo, Action{DelegateBuilder})"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="TResult">The type of result returned by the method call. The actual type
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
@@ -85,14 +85,14 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
-        public static InstanceMethodFunc<TInstance, TResult> BuildFuncInstanced<TInstance, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            BuildFuncInstanced<InstanceMethodFunc<TInstance, TResult>>(method, builderSetup, typeof(TInstance), Type.EmptyTypes);
+        public static InstanceMethodFunc<TInstance, TResult> CreateFuncInstanced<TInstance, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
+            CreateFuncInstanced<InstanceMethodFunc<TInstance, TResult>>(method, builderSetup, typeof(TInstance), Type.EmptyTypes);
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T, TResult}"/> that invokes the method using the argument
         /// to the first parameter of the func as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildFuncStatic{T, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateFuncStatic{T, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="T">The type of the argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
@@ -112,14 +112,14 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static InstanceMethodFunc<TInstance, T, TResult> BuildFuncInstanced<TInstance, T, TResult>(this MethodInfo method) =>
-            BuildFuncInstanced<TInstance, T, TResult>(method, DelegateBuilderSetupNoOp);
+        public static InstanceMethodFunc<TInstance, T, TResult> CreateFuncInstanced<TInstance, T, TResult>(this MethodInfo method) =>
+            CreateFuncInstanced<TInstance, T, TResult>(method, DelegateBuilderSetupNoOp);
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T, TResult}"/> that invokes the method using the argument
         /// to the first parameter of the func as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildFuncStatic{T, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateFuncStatic{T, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="T">The type of the argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
@@ -140,14 +140,14 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
-        public static InstanceMethodFunc<TInstance, T, TResult> BuildFuncInstanced<TInstance, T, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            BuildFuncInstanced<InstanceMethodFunc<TInstance, T, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T>());
+        public static InstanceMethodFunc<TInstance, T, TResult> CreateFuncInstanced<TInstance, T, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
+            CreateFuncInstanced<InstanceMethodFunc<TInstance, T, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T>());
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T1, T2, TResult}"/> that invokes the method using the argument
         /// to the first parameter of the func as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildFuncStatic{T1, T2, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateFuncStatic{T1, T2, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
@@ -169,14 +169,14 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static InstanceMethodFunc<TInstance, T1, T2, TResult> BuildFuncInstanced<TInstance, T1, T2, TResult>(this MethodInfo method) =>
-            BuildFuncInstanced<TInstance, T1, T2, TResult>(method, DelegateBuilderSetupNoOp);
+        public static InstanceMethodFunc<TInstance, T1, T2, TResult> CreateFuncInstanced<TInstance, T1, T2, TResult>(this MethodInfo method) =>
+            CreateFuncInstanced<TInstance, T1, T2, TResult>(method, DelegateBuilderSetupNoOp);
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T1, T2, TResult}"/> that invokes the method using the argument
         /// to the first parameter of the func as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildFuncStatic{T1, T2, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateFuncStatic{T1, T2, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
@@ -199,14 +199,14 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
-        public static InstanceMethodFunc<TInstance, T1, T2, TResult> BuildFuncInstanced<TInstance, T1, T2, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            BuildFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2>());
+        public static InstanceMethodFunc<TInstance, T1, T2, TResult> CreateFuncInstanced<TInstance, T1, T2, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
+            CreateFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2>());
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T1, T2, T3, TResult}"/> that invokes the method using the argument
         /// to the first parameter of the func as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildFuncStatic{T1, T2, T3, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateFuncStatic{T1, T2, T3, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
@@ -230,14 +230,14 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static InstanceMethodFunc<TInstance, T1, T2, T3, TResult> BuildFuncInstanced<TInstance, T1, T2, T3, TResult>(this MethodInfo method) =>
-            BuildFuncInstanced<TInstance, T1, T2, T3, TResult>(method, DelegateBuilderSetupNoOp);
+        public static InstanceMethodFunc<TInstance, T1, T2, T3, TResult> CreateFuncInstanced<TInstance, T1, T2, T3, TResult>(this MethodInfo method) =>
+            CreateFuncInstanced<TInstance, T1, T2, T3, TResult>(method, DelegateBuilderSetupNoOp);
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T1, T2, T3, TResult}"/> that invokes the method using the argument
         /// to the first parameter of the func as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildFuncStatic{T1, T2, T3, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateFuncStatic{T1, T2, T3, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
@@ -262,14 +262,14 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
-        public static InstanceMethodFunc<TInstance, T1, T2, T3, TResult> BuildFuncInstanced<TInstance, T1, T2, T3, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            BuildFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, T3, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2, T3>());
+        public static InstanceMethodFunc<TInstance, T1, T2, T3, TResult> CreateFuncInstanced<TInstance, T1, T2, T3, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
+            CreateFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, T3, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2, T3>());
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T1, T2, T3, T4, TResult}"/> that invokes the method using the argument
         /// to the first parameter of the func as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildFuncStatic{T1, T2, T3, T4, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateFuncStatic{T1, T2, T3, T4, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
@@ -295,14 +295,14 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static InstanceMethodFunc<TInstance, T1, T2, T3, T4, TResult> BuildFuncInstanced<TInstance, T1, T2, T3, T4, TResult>(this MethodInfo method) =>
-            BuildFuncInstanced<TInstance, T1, T2, T3, T4, TResult>(method, DelegateBuilderSetupNoOp);
+        public static InstanceMethodFunc<TInstance, T1, T2, T3, T4, TResult> CreateFuncInstanced<TInstance, T1, T2, T3, T4, TResult>(this MethodInfo method) =>
+            CreateFuncInstanced<TInstance, T1, T2, T3, T4, TResult>(method, DelegateBuilderSetupNoOp);
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T1, T2, T3, T4, TResult}"/> that invokes the method using the argument
         /// to the first parameter of the func as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildFuncStatic{T1, T2, T3, T4, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateFuncStatic{T1, T2, T3, T4, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
@@ -329,14 +329,14 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
-        public static InstanceMethodFunc<TInstance, T1, T2, T3, T4, TResult> BuildFuncInstanced<TInstance, T1, T2, T3, T4, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            BuildFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, T3, T4, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2, T3, T4>());
+        public static InstanceMethodFunc<TInstance, T1, T2, T3, T4, TResult> CreateFuncInstanced<TInstance, T1, T2, T3, T4, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
+            CreateFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, T3, T4, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2, T3, T4>());
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T1, T2, T3, T4, T5, TResult}"/> that invokes the method using the argument
         /// to the first parameter of the func as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildFuncStatic{T1, T2, T3, T4, T5, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateFuncStatic{T1, T2, T3, T4, T5, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
@@ -364,14 +364,14 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static InstanceMethodFunc<TInstance, T1, T2, T3, T4, T5, TResult> BuildFuncInstanced<TInstance, T1, T2, T3, T4, T5, TResult>(this MethodInfo method) =>
-            BuildFuncInstanced<TInstance, T1, T2, T3, T4, T5, TResult>(method, DelegateBuilderSetupNoOp);
+        public static InstanceMethodFunc<TInstance, T1, T2, T3, T4, T5, TResult> CreateFuncInstanced<TInstance, T1, T2, T3, T4, T5, TResult>(this MethodInfo method) =>
+            CreateFuncInstanced<TInstance, T1, T2, T3, T4, T5, TResult>(method, DelegateBuilderSetupNoOp);
 
         /// <summary>
         /// Builds this method into an <see cref="InstanceMethodFunc{TInstance, T1, T2, T3, T4, T5, TResult}"/> that invokes the method using the argument
         /// to the first parameter of the func as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildFuncStatic{T1, T2, T3, T4, T5, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateFuncStatic{T1, T2, T3, T4, T5, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
@@ -400,15 +400,15 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="builderSetup"/> is null.</exception>
-        public static InstanceMethodFunc<TInstance, T1, T2, T3, T4, T5, TResult> BuildFuncInstanced<TInstance, T1, T2, T3, T4, T5, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            BuildFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, T3, T4, T5, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2, T3, T4, T5>());
+        public static InstanceMethodFunc<TInstance, T1, T2, T3, T4, T5, TResult> CreateFuncInstanced<TInstance, T1, T2, T3, T4, T5, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
+            CreateFuncInstanced<InstanceMethodFunc<TInstance, T1, T2, T3, T4, T5, TResult>>(method, builderSetup, typeof(TInstance), TypeHelpers.TypeArray<T1, T2, T3, T4, T5>());
 
-        private static TDelegate BuildFuncInstanced<TDelegate>(MethodInfo method, Action<DelegateBuilder> builderSetup, Type instanceType, Type[] parameterTypes)
+        private static TDelegate CreateFuncInstanced<TDelegate>(MethodInfo method, Action<DelegateBuilder> builderSetup, Type instanceType, Type[] parameterTypes)
             where TDelegate : Delegate =>
             method is null ? throw new ArgumentNullException(nameof(method)) :
             builderSetup is null ? throw new ArgumentNullException(nameof(builderSetup)) :
-            method.IsStatic ? throw new ArgumentException($"Given method may not be static (see {nameof(BuildActionStatic)} for static methods)!", nameof(method)) :
-            BuildDelegate<TDelegate>(method, b =>
+            method.IsStatic ? throw new ArgumentException($"Given method may not be static (see {nameof(CreateFuncStatic)} for static methods)!", nameof(method)) :
+            CreateDelegate<TDelegate>(method, b =>
             {
                 b.UseInstanceParameter(instanceType);
                 b.UseArgumentsFromParameters(parameterTypes);
@@ -419,7 +419,7 @@ namespace HotLib.DotNetExtensions
         /// <summary>
         /// Builds this method into an <see cref="Func{T, TResult}"/> that invokes the method statically.
         /// </summary>
-        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="BuildFuncInstanced{TInstance, T, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="CreateFuncInstanced{TInstance, T, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="T">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
         /// <typeparam name="TResult">The type of result returned by the method call. The actual type
@@ -438,13 +438,13 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static Func<T, TResult> BuildFuncStatic<T, TResult>(this MethodInfo method) =>
-            BuildFuncStatic<T, TResult>(method, DelegateBuilderSetupNoOp);
+        public static Func<T, TResult> CreateFuncStatic<T, TResult>(this MethodInfo method) =>
+            CreateFuncStatic<T, TResult>(method, DelegateBuilderSetupNoOp);
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T, TResult}"/> that invokes the method statically.
         /// </summary>
-        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="BuildFuncInstanced{TInstance, T, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="CreateFuncInstanced{TInstance, T, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="T">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
         /// <typeparam name="TResult">The type of result returned by the method call. The actual type
@@ -464,13 +464,13 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static Func<T, TResult> BuildFuncStatic<T, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            BuildFuncStatic<Func<T, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T>());
+        public static Func<T, TResult> CreateFuncStatic<T, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
+            CreateFuncStatic<Func<T, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T>());
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T1, T2, TResult}"/> that invokes the method statically.
         /// </summary>
-        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="BuildFuncInstanced{TInstance, T1, T2, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="CreateFuncInstanced{TInstance, T1, T2, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
         /// <typeparam name="T2">The type of the second argument passed to the method call.
@@ -491,13 +491,13 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static Func<T1, T2, TResult> BuildFuncStatic<T1, T2, TResult>(this MethodInfo method) =>
-            BuildFuncStatic<T1, T2, TResult>(method, DelegateBuilderSetupNoOp);
+        public static Func<T1, T2, TResult> CreateFuncStatic<T1, T2, TResult>(this MethodInfo method) =>
+            CreateFuncStatic<T1, T2, TResult>(method, DelegateBuilderSetupNoOp);
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T1, T2, TResult}"/> that invokes the method statically.
         /// </summary>
-        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="BuildFuncInstanced{TInstance, T1, T2, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="CreateFuncInstanced{TInstance, T1, T2, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
         /// <typeparam name="T2">The type of the second argument passed to the method call.
@@ -519,13 +519,13 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static Func<T1, T2, TResult> BuildFuncStatic<T1, T2, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            BuildFuncStatic<Func<T1, T2, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2>());
+        public static Func<T1, T2, TResult> CreateFuncStatic<T1, T2, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
+            CreateFuncStatic<Func<T1, T2, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2>());
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T1, T2, T3, TResult}"/> that invokes the method statically.
         /// </summary>
-        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="BuildFuncInstanced{TInstance, T1, T2, T3, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="CreateFuncInstanced{TInstance, T1, T2, T3, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
         /// <typeparam name="T2">The type of the second argument passed to the method call.
@@ -548,13 +548,13 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static Func<T1, T2, T3, TResult> BuildFuncStatic<T1, T2, T3, TResult>(this MethodInfo method) =>
-            BuildFuncStatic<T1, T2, T3, TResult>(method, DelegateBuilderSetupNoOp);
+        public static Func<T1, T2, T3, TResult> CreateFuncStatic<T1, T2, T3, TResult>(this MethodInfo method) =>
+            CreateFuncStatic<T1, T2, T3, TResult>(method, DelegateBuilderSetupNoOp);
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T1, T2, T3, TResult}"/> that invokes the method statically.
         /// </summary>
-        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="BuildFuncInstanced{TInstance, T1, T2, T3, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="CreateFuncInstanced{TInstance, T1, T2, T3, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
         /// <typeparam name="T2">The type of the second argument passed to the method call.
@@ -578,13 +578,13 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static Func<T1, T2, T3, TResult> BuildFuncStatic<T1, T2, T3, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            BuildFuncStatic<Func<T1, T2, T3, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2, T3>());
+        public static Func<T1, T2, T3, TResult> CreateFuncStatic<T1, T2, T3, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
+            CreateFuncStatic<Func<T1, T2, T3, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2, T3>());
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T1, T2, T3, T4, TResult}"/> that invokes the method statically.
         /// </summary>
-        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="BuildFuncInstanced{TInstance, T1, T2, T3, T4, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="CreateFuncInstanced{TInstance, T1, T2, T3, T4, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
         /// <typeparam name="T2">The type of the second argument passed to the method call.
@@ -609,13 +609,13 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static Func<T1, T2, T3, T4, TResult> BuildFuncStatic<T1, T2, T3, T4, TResult>(this MethodInfo method) =>
-            BuildFuncStatic<T1, T2, T3, T4, TResult>(method, DelegateBuilderSetupNoOp);
+        public static Func<T1, T2, T3, T4, TResult> CreateFuncStatic<T1, T2, T3, T4, TResult>(this MethodInfo method) =>
+            CreateFuncStatic<T1, T2, T3, T4, TResult>(method, DelegateBuilderSetupNoOp);
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T1, T2, T3, T4, TResult}"/> that invokes the method statically.
         /// </summary>
-        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="BuildFuncInstanced{TInstance, T1, T2, T3, T4, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="CreateFuncInstanced{TInstance, T1, T2, T3, T4, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
         /// <typeparam name="T2">The type of the second argument passed to the method call.
@@ -641,13 +641,13 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static Func<T1, T2, T3, T4, TResult> BuildFuncStatic<T1, T2, T3, T4, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            BuildFuncStatic<Func<T1, T2, T3, T4, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2, T3, T4>());
+        public static Func<T1, T2, T3, T4, TResult> CreateFuncStatic<T1, T2, T3, T4, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
+            CreateFuncStatic<Func<T1, T2, T3, T4, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2, T3, T4>());
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T1, T2, T3, T4, T5, TResult}"/> that invokes the method statically.
         /// </summary>
-        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="BuildFuncInstanced{TInstance, T1, T2, T3, T4, T5, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="CreateFuncInstanced{TInstance, T1, T2, T3, T4, T5, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
         /// <typeparam name="T2">The type of the second argument passed to the method call.
@@ -674,13 +674,13 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static Func<T1, T2, T3, T4, T5, TResult> BuildFuncStatic<T1, T2, T3, T4, T5, TResult>(this MethodInfo method) =>
-            BuildFuncStatic<T1, T2, T3, T4, T5, TResult>(method, DelegateBuilderSetupNoOp);
+        public static Func<T1, T2, T3, T4, T5, TResult> CreateFuncStatic<T1, T2, T3, T4, T5, TResult>(this MethodInfo method) =>
+            CreateFuncStatic<T1, T2, T3, T4, T5, TResult>(method, DelegateBuilderSetupNoOp);
 
         /// <summary>
         /// Builds this method into an <see cref="Func{T1, T2, T3, T4, T5, TResult}"/> that invokes the method statically.
         /// </summary>
-        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="BuildFuncInstanced{TInstance, T1, T2, T3, T4, T5, TResult}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be static method.</b> For non-static methods, see <see cref="CreateFuncInstanced{TInstance, T1, T2, T3, T4, T5, TResult}(MethodInfo)"/>.</remarks>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
         /// <typeparam name="T2">The type of the second argument passed to the method call.
@@ -708,15 +708,15 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentException"><paramref name="method"/> is non-static.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static Func<T1, T2, T3, T4, T5, TResult> BuildFuncStatic<T1, T2, T3, T4, T5, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
-            BuildFuncStatic<Func<T1, T2, T3, T4, T5, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2, T3, T4, T5>());
+        public static Func<T1, T2, T3, T4, T5, TResult> CreateFuncStatic<T1, T2, T3, T4, T5, TResult>(this MethodInfo method, Action<DelegateBuilder> builderSetup) =>
+            CreateFuncStatic<Func<T1, T2, T3, T4, T5, TResult>>(method, builderSetup, TypeHelpers.TypeArray<T1, T2, T3, T4, T5>());
 
-        private static TDelegate BuildFuncStatic<TDelegate>(MethodInfo method, Action<DelegateBuilder> builderSetup, Type[] parameterTypes)
+        private static TDelegate CreateFuncStatic<TDelegate>(MethodInfo method, Action<DelegateBuilder> builderSetup, Type[] parameterTypes)
             where TDelegate : Delegate =>
             method is null ? throw new ArgumentNullException(nameof(method)) :
             builderSetup is null ? throw new ArgumentNullException(nameof(builderSetup)) :
-            !method.IsStatic ? throw new ArgumentException($"Given method must be static (see {nameof(BuildFuncInstanced)} for non-static methods)!", nameof(method)) :
-            BuildDelegate<TDelegate>(method, b =>
+            !method.IsStatic ? throw new ArgumentException($"Given method must be static (see {nameof(CreateFuncInstanced)} for non-static methods)!", nameof(method)) :
+            CreateDelegate<TDelegate>(method, b =>
             {
                 b.UseArgumentsFromParameters(parameterTypes);
 
