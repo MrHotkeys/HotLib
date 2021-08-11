@@ -46,6 +46,7 @@ namespace HotLib
             typeof(T3),
             typeof(T4),
             typeof(T5),
+            typeof(T6),
         };
     }
 }
