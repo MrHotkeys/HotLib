@@ -47,8 +47,13 @@ namespace HotLib.DotNetExtensions
         /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildDelegateStatic{TDelegate}(MethodInfo, Type[])"/>.</remarks>
         /// <typeparam name="TDelegate">The type of <see cref="Delegate"/> to build the method into.</typeparam>
         /// <param name="method">The method to build into an action.</param>
-        /// <exception cref="IncompatibleParameterTypeException">A given parameter type cannot be cast to be compatible with the
+        /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
+        ///     number of parameters on the given method.</exception>
+        /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
         ///     corresponding parameter in the method signature.</exception>
+        /// <exception cref="IncompatibleParameterTypeException">An argument-mapped parameter type given can't be cast to be compatible with the
+        ///     corresponding parameter in the method signature.</exception>
+        /// <exception cref="IncompatibleReturnTypeException">The return type of the method cannot be converted into the given return type.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
         public static TDelegate BuildDelegate<TDelegate>(this MethodInfo method, Action<DelegateBuilder> builderSetup)
             where TDelegate : Delegate
