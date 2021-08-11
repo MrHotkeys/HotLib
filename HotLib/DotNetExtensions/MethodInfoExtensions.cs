@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
+using HotLib.DelegateBuilding;
+
 namespace HotLib.DotNetExtensions
 {
     public static partial class MethodInfoExtensions
     {
+        private static readonly Action<DelegateBuilder> DelegateBuilderSetupNoOp = delegate { };
+
         public static bool IsOverrideOf(this MethodInfo method, MethodInfo other)
         {
             if (method is null)
@@ -36,10 +40,20 @@ namespace HotLib.DotNetExtensions
             }
         }
 
-        public static TDelegate BuildDelegate<TDelegate>(this MethodInfo method, Action<DelegateBuilding.DelegateBuilder> builderSetup)
+        /// <summary>
+        /// Builds this method into a delegate that invokes the method using the argument to the first
+        /// parameter of the action as the target object and returns void.
+        /// </summary>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildDelegateStatic{TDelegate}(MethodInfo, Type[])"/>.</remarks>
+        /// <typeparam name="TDelegate">The type of <see cref="Delegate"/> to build the method into.</typeparam>
+        /// <param name="method">The method to build into an action.</param>
+        /// <exception cref="IncompatibleParameterTypeException">A given parameter type cannot be cast to be compatible with the
+        ///     corresponding parameter in the method signature.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
+        public static TDelegate BuildDelegate<TDelegate>(this MethodInfo method, Action<DelegateBuilder> builderSetup)
             where TDelegate : Delegate
         {
-            var builder = new DelegateBuilding.DelegateBuilder(method);
+            var builder = new DelegateBuilder(method);
 
             builderSetup(builder);
 
