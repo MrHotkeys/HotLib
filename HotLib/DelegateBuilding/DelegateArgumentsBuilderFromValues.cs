@@ -14,6 +14,6 @@ namespace HotLib.DelegateBuilding
             Expression.Constant(source);
 
         protected override Exception GetIncompatibleTypeException(object? source, ParameterInfo parameter) =>
-            new DotNetExtensions.MethodInfoExtensions.IncompatibleArgumentTypeException(Method, parameter, source);
+            new IncompatibleArgumentTypeException(Method, parameter, source);
     }
 }

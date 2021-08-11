@@ -97,7 +97,7 @@ namespace HotLib.DelegateBuilding
                 if (ReturnType.IsAssignableFrom(body.Type))
                     body = Expression.Convert(body, ReturnType);
                 else
-                    throw new DotNetExtensions.MethodInfoExtensions.IncompatibleReturnTypeException(Method, ReturnType, body.Type);
+                    throw new IncompatibleReturnTypeException(Method, ReturnType, body.Type);
             }
 
             return Expression

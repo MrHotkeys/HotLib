@@ -21,7 +21,7 @@ namespace HotLib.DelegateBuilding
             var parameters = Method.GetParameters();
 
             if (parameters.Length != Sources.Length)
-                throw new DotNetExtensions.MethodInfoExtensions.ArgumentCountMismatchException(Method, parameters.Length, Sources.Length);
+                throw new ArgumentCountMismatchException(Method, parameters.Length, Sources.Length);
 
             var argExprs = new Expression[Sources.Length];
 
@@ -63,7 +63,7 @@ namespace HotLib.DelegateBuilding
                                     variable: exceptionLocalExpr,
                                     body: ExpressionHelpers.Throw(
                                         exceptionExpr: (object o, InvalidCastException e) =>
-                                            new DotNetExtensions.MethodInfoExtensions.IncompatibleArgumentTypeException(Method, parameter, o, e),
+                                            new IncompatibleArgumentTypeException(Method, parameter, o, e),
                                         expr1: sourceExpr,
                                         expr2: exceptionLocalExpr,
                                         type: parameter.ParameterType),

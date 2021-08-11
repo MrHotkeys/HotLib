@@ -8,85 +8,6 @@ namespace HotLib.DotNetExtensions
 {
     public static partial class MethodInfoExtensions
     {
-        public class ArgumentCountMismatchException : Exception
-        {
-            public MethodInfo Method { get; }
-            public int Expected { get; }
-            public int Actual { get; }
-
-            public ArgumentCountMismatchException(MethodInfo method, int expected, int actual)
-                : this(method, expected, actual, null)
-            { }
-
-            public ArgumentCountMismatchException(MethodInfo method, int expected, int actual, Exception? innerException)
-                : base($"Incorrect number of parameters given for method {method} (expected {expected}, got {actual})!", innerException)
-            {
-                Method = method;
-                Expected = expected;
-                Actual = actual;
-            }
-        }
-
-        public class IncompatibleArgumentTypeException : Exception
-        {
-            public MethodInfo Method { get; }
-            public ParameterInfo Parameter { get; }
-            public object? Argument { get; }
-
-            public IncompatibleArgumentTypeException(MethodInfo method, ParameterInfo parameter, object? argument)
-                : this(method, parameter, argument, null)
-            { }
-
-            public IncompatibleArgumentTypeException(MethodInfo method, ParameterInfo parameter, object? argument, Exception? innerException)
-                : base($"Unable to cast object {argument ?? "NULL"} of type {argument?.GetType()?.ToString() ?? "NULL"} to " +
-                      $"{parameter.ParameterType} for parameter {parameter.Name} at position {parameter.Position} in method {method}!",
-                      innerException)
-            {
-                Method = method;
-                Parameter = parameter;
-                Argument = argument;
-            }
-        }
-
-        public class IncompatibleParameterTypeException : Exception
-        {
-            public MethodInfo Method { get; }
-            public ParameterInfo ParameterActual { get; }
-            public Type ParameterTypeGiven { get; }
-
-            public IncompatibleParameterTypeException(MethodInfo method, ParameterInfo parameterActual, Type parameterTypeGiven)
-                : this(method, parameterActual, parameterTypeGiven, null)
-            { }
-
-            public IncompatibleParameterTypeException(MethodInfo method, ParameterInfo parameterActual, Type parameterTypeGiven, Exception? innerException)
-                : base($"Unable to cast parameter of type {parameterTypeGiven} to " +
-                      $"{parameterActual.ParameterType} for parameter {parameterActual.Name} at position {parameterActual.Position} in method {method}!", innerException)
-            {
-                Method = method;
-                ParameterActual = parameterActual;
-                ParameterTypeGiven = parameterTypeGiven;
-            }
-        }
-
-        public class IncompatibleReturnTypeException : Exception
-        {
-            public MethodInfo Method { get; }
-            public Type Expected { get; }
-            public Type Actual { get; }
-
-            public IncompatibleReturnTypeException(MethodInfo method, Type expected, Type actual)
-                : this(method, expected, actual, null)
-            { }
-
-            public IncompatibleReturnTypeException(MethodInfo method, Type expected, Type actual, Exception? innerException)
-                : base($"Unable to cast return type {actual} to type {expected} in method {method}!")
-            {
-                Method = method;
-                Expected = expected;
-                Actual = actual;
-            }
-        }
-
         /// <summary>
         /// Builds this method into a delegate that invokes the method using the given target object and arguments for each call and returns void.
         /// </summary>
@@ -363,7 +284,7 @@ namespace HotLib.DotNetExtensions
                 if (returnType.IsAssignableFrom(body.Type))
                     body = Expression.Convert(body, returnType);
                 else
-                    throw new IncompatibleReturnTypeException(method, returnType, body.Type);
+                    throw new DelegateBuilding.IncompatibleReturnTypeException(method, returnType, body.Type);
             }
 
             return Expression
@@ -376,7 +297,7 @@ namespace HotLib.DotNetExtensions
             var parameters = method.GetParameters();
 
             if (parameters.Length != paramExprs.Length)
-                throw new ArgumentCountMismatchException(method, parameters.Length, paramExprs.Length);
+                throw new DelegateBuilding.ArgumentCountMismatchException(method, parameters.Length, paramExprs.Length);
 
             var argExprs = new Expression[paramExprs.Length];
 
@@ -388,7 +309,7 @@ namespace HotLib.DotNetExtensions
                 argExprs[i] =
                     current.Type == parameterType ? current :
                     parameterType.IsAssignableFrom(current.Type) ? Expression.Convert(current, parameterType) :
-                    throw new IncompatibleParameterTypeException(method, parameters[i], current.Type);
+                    throw new DelegateBuilding.IncompatibleParameterTypeException(method, parameters[i], current.Type);
             }
 
             return argExprs;
@@ -399,7 +320,7 @@ namespace HotLib.DotNetExtensions
             var parameters = method.GetParameters();
 
             if (parameters.Length != args.Length)
-                throw new ArgumentCountMismatchException(method, parameters.Length, args.Length);
+                throw new DelegateBuilding.ArgumentCountMismatchException(method, parameters.Length, args.Length);
 
             var argExprs = new Expression[args.Length];
 
@@ -412,7 +333,7 @@ namespace HotLib.DotNetExtensions
                 argExprs[i] =
                     currentExpr.Type == parameterType ? currentExpr :
                     parameterType.IsAssignableFrom(currentExpr.Type) ? Expression.Convert(currentExpr, parameterType) :
-                    throw new IncompatibleArgumentTypeException(method, parameters[i], current);
+                    throw new DelegateBuilding.IncompatibleArgumentTypeException(method, parameters[i], current);
             }
 
             return argExprs;
