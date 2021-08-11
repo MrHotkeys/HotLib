@@ -136,7 +136,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="IncompatibleParameterTypeException">An argument-mapped parameter type given can't be cast to be compatible with the
         ///     corresponding parameter in the method signature.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="method"/> is null.</exception>
-        public static Action<T1, T2, T3> CreateActionStatic<T1, T2, T3>(this MethodInfo method) =>
+        public static Action<T1, T2, T3> CreateAction<T1, T2, T3>(this MethodInfo method) =>
             CreateAction<T1, T2, T3>(method, DelegateBuilderSetupNoOp);
 
         /// <summary>
@@ -436,7 +436,7 @@ namespace HotLib.DotNetExtensions
         /// Builds this method into an <see cref="InstanceMethodAction{TInstance, T1, T2, T3}"/> that invokes the method using the argument
         /// to the first parameter of the action as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateActionStatic{T1, T2, T3}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateAction{T1, T2, T3}(MethodInfo)"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
@@ -464,7 +464,7 @@ namespace HotLib.DotNetExtensions
         /// Builds this method into an <see cref="InstanceMethodAction{TInstance, T1, T2, T3}"/> that invokes the method using the argument
         /// to the first parameter of the action as the target object.
         /// </summary>
-        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateActionStatic{T1, T2, T3}(MethodInfo)"/>.</remarks>
+        /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="CreateAction{T1, T2, T3}(MethodInfo)"/>.</remarks>
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <typeparam name="T1">The type of the first argument passed to the method call.
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
@@ -619,7 +619,7 @@ namespace HotLib.DotNetExtensions
             where TDelegate : Delegate =>
             method is null ? throw new ArgumentNullException(nameof(method)) :
             builderSetup is null ? throw new ArgumentNullException(nameof(builderSetup)) :
-            method.IsStatic ? throw new ArgumentException($"Given method may not be static (see {nameof(CreateActionStatic)} for static methods)!", nameof(method)) :
+            method.IsStatic ? throw new ArgumentException($"Given method may not be static (see {nameof(CreateAction)} for static methods)!", nameof(method)) :
             CreateDelegate<TDelegate>(method, b =>
             {
                 b.UseInstanceParameter(instanceType);
