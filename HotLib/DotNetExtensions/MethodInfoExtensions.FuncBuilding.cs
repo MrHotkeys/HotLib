@@ -16,6 +16,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into a func.</param>
         /// <param name="builderSetup">An func which can be used to further configure the built delegate.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -44,6 +47,9 @@ namespace HotLib.DotNetExtensions
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
         /// <param name="method">The method to build into a func.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -67,6 +73,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into a func.</param>
         /// <param name="builderSetup">An func which can be used to further configure the built delegate.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -91,6 +100,9 @@ namespace HotLib.DotNetExtensions
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
         /// <param name="method">The method to build into a func.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -116,6 +128,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into a func.</param>
         /// <param name="builderSetup">An func which can be used to further configure the built delegate.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -142,6 +157,9 @@ namespace HotLib.DotNetExtensions
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
         /// <param name="method">The method to build into a func.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -169,6 +187,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into a func.</param>
         /// <param name="builderSetup">An func which can be used to further configure the built delegate.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -197,6 +218,9 @@ namespace HotLib.DotNetExtensions
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
         /// <param name="method">The method to build into a func.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -226,6 +250,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into a func.</param>
         /// <param name="builderSetup">An func which can be used to further configure the built delegate.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -256,6 +283,9 @@ namespace HotLib.DotNetExtensions
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
         /// <param name="method">The method to build into a func.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -287,6 +317,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into a func.</param>
         /// <param name="builderSetup">An func which can be used to further configure the built delegate.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -319,6 +352,9 @@ namespace HotLib.DotNetExtensions
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
         /// <param name="method">The method to build into a func.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -352,6 +388,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into a func.</param>
         /// <param name="builderSetup">An func which can be used to further configure the built delegate.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -387,6 +426,9 @@ namespace HotLib.DotNetExtensions
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
         /// <param name="method">The method to build into a func.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -410,6 +452,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into a func.</param>
         /// <param name="builderSetup">An func which can be used to further configure the built delegate.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -434,6 +479,9 @@ namespace HotLib.DotNetExtensions
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
         /// <param name="method">The method to build into a func.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -459,6 +507,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into a func.</param>
         /// <param name="builderSetup">An func which can be used to further configure the built delegate.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -485,6 +536,9 @@ namespace HotLib.DotNetExtensions
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
         /// <param name="method">The method to build into a func.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -512,6 +566,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into a func.</param>
         /// <param name="builderSetup">An func which can be used to further configure the built delegate.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -540,6 +597,9 @@ namespace HotLib.DotNetExtensions
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
         /// <param name="method">The method to build into a func.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -569,6 +629,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into a func.</param>
         /// <param name="builderSetup">An func which can be used to further configure the built delegate.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -599,6 +662,9 @@ namespace HotLib.DotNetExtensions
         ///     returned will be attempted to be converted to this value if it is not the same type.</typeparam>
         /// <param name="method">The method to build into a func.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -630,6 +696,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into a func.</param>
         /// <param name="builderSetup">An func which can be used to further configure the built delegate.</param>
         /// <returns>The resulting func.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the

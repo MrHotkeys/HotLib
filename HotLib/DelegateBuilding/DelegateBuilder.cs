@@ -80,6 +80,8 @@ namespace HotLib.DelegateBuilding
         public TDelegate Build<TDelegate>()
             where TDelegate : Delegate
         {
+            EnsureInstanceValid();
+
             var parameterExpressions =
                 InstanceExpression is ParameterExpression instanceParameterExpr ?
                 Enumerable.Repeat(instanceParameterExpr, 1).Concat(NonInstanceParameterExpressions) :
@@ -103,6 +105,26 @@ namespace HotLib.DelegateBuilding
             return Expression
                 .Lambda<TDelegate>(body, parameterExpressions)
                 .Compile();
+        }
+
+        protected void EnsureInstanceValid()
+        {
+            if (Method.IsStatic)
+            {
+                if (InstanceExpression is not null)
+                    throw IncompatibleInstanceException.ForNonNullWithStatic(Method, InstanceExpression.Type);
+            }
+            else // Non-static
+            {
+                if (InstanceExpression is null)
+                    throw IncompatibleInstanceException.ForNullWithNonStatic(Method);
+
+                if (Method.DeclaringType is null)
+                    throw new NotSupportedException();
+
+                if (!Method.DeclaringType.IsAssignableFrom(InstanceExpression.Type))
+                    throw IncompatibleInstanceException.ForIncompatibleType(Method, InstanceExpression.Type);
+            }
         }
     }
 }

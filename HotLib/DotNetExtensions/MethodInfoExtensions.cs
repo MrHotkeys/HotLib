@@ -47,6 +47,9 @@ namespace HotLib.DotNetExtensions
         /// <remarks><b>Must be non-static method.</b> For static methods, see <see cref="BuildDelegateStatic{TDelegate}(MethodInfo, Type[])"/>.</remarks>
         /// <typeparam name="TDelegate">The type of <see cref="Delegate"/> to build the method into.</typeparam>
         /// <param name="method">The method to build into an action.</param>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the

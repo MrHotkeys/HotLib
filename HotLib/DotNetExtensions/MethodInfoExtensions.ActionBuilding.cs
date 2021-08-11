@@ -14,6 +14,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="builderSetup">An action which can be used to further configure the built delegate.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -34,6 +37,9 @@ namespace HotLib.DotNetExtensions
         /// <typeparam name="TInstance">The type of object to invoke the encapsulated method on.</typeparam>
         /// <param name="method">The method to build into an action.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -54,6 +60,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="builderSetup">An action which can be used to further configure the built delegate.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -75,6 +84,9 @@ namespace HotLib.DotNetExtensions
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
         /// <param name="method">The method to build into an action.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -97,6 +109,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="builderSetup">An action which can be used to further configure the built delegate.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -120,6 +135,9 @@ namespace HotLib.DotNetExtensions
         ///     Will attempt to convert to the method's second parameter type if not the exact same type.</typeparam>
         /// <param name="method">The method to build into an action.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -144,6 +162,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="builderSetup">An action which can be used to further configure the built delegate.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -169,6 +190,9 @@ namespace HotLib.DotNetExtensions
         ///     Will attempt to convert to the method's third parameter type if not the exact same type.</typeparam>
         /// <param name="method">The method to build into an action.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -195,6 +219,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="builderSetup">An action which can be used to further configure the built delegate.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -222,6 +249,9 @@ namespace HotLib.DotNetExtensions
         ///     Will attempt to convert to the method's fourth parameter type if not the exact same type.</typeparam>
         /// <param name="method">The method to build into an action.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -250,6 +280,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="builderSetup">An action which can be used to further configure the built delegate.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -279,6 +312,9 @@ namespace HotLib.DotNetExtensions
         ///     Will attempt to convert to the method's fifth parameter type if not the exact same type.</typeparam>
         /// <param name="method">The method to build into an action.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -309,6 +345,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="builderSetup">An action which can be used to further configure the built delegate.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -341,6 +380,9 @@ namespace HotLib.DotNetExtensions
         ///     Will attempt to convert to the method's first parameter type if not the exact same type.</typeparam>
         /// <param name="method">The method to build into an action.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -361,6 +403,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="builderSetup">An action which can be used to further configure the built delegate.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -382,6 +427,9 @@ namespace HotLib.DotNetExtensions
         ///     Will attempt to convert to the method's second parameter type if not the exact same type.</typeparam>
         /// <param name="method">The method to build into an action.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -404,6 +452,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="builderSetup">An action which can be used to further configure the built delegate.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -427,6 +478,9 @@ namespace HotLib.DotNetExtensions
         ///     Will attempt to convert to the method's third parameter type if not the exact same type.</typeparam>
         /// <param name="method">The method to build into an action.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -451,6 +505,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="builderSetup">An action which can be used to further configure the built delegate.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -476,6 +533,9 @@ namespace HotLib.DotNetExtensions
         ///     Will attempt to convert to the method's fourth parameter type if not the exact same type.</typeparam>
         /// <param name="method">The method to build into an action.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -502,6 +562,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="builderSetup">An action which can be used to further configure the built delegate.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -529,6 +592,9 @@ namespace HotLib.DotNetExtensions
         ///     Will attempt to convert to the method's fifth parameter type if not the exact same type.</typeparam>
         /// <param name="method">The method to build into an action.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
@@ -557,6 +623,9 @@ namespace HotLib.DotNetExtensions
         /// <param name="method">The method to build into an action.</param>
         /// <param name="builderSetup">An action which can be used to further configure the built delegate.</param>
         /// <returns>The resulting action.</returns>
+        /// <exception cref="IncompatibleInstanceException">The method is static and no instance is given.
+        ///     -or-The method is non-static and an instance is given.
+        ///     -or-The method is not defined for the instance given.</exception>
         /// <exception cref="ArgumentCountMismatchException">The number of arguments given does not match the
         ///     number of parameters on the given method.</exception>
         /// <exception cref="IncompatibleArgumentTypeException">An argument value given can't be cast to be compatible with the
