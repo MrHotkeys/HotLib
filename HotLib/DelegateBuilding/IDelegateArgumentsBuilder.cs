@@ -4,6 +4,6 @@ namespace HotLib.DelegateBuilding
 {
     public interface IDelegateArgumentsBuilder
     {
-        Expression[] Build(DelegateBuilderTypeCheck typeCheckOptions);
+        Expression[] Build();
     }
 }

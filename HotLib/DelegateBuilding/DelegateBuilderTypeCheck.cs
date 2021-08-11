@@ -1,8 +1,8 @@
-﻿namespace HotLib.DelegateBuilding
-{
-    public enum DelegateBuilderTypeCheck
-    {
-        AtCompileTime,
-        AtCallTime,
-    }
-}
+﻿//namespace HotLib.DelegateBuilding
+//{
+//    public enum DelegateBuilderTypeCheck
+//    {
+//        AtCompileTime,
+//        AtCallTime,
+//    }
+//}

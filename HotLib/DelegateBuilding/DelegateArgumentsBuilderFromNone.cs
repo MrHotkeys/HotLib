@@ -10,7 +10,7 @@ namespace HotLib.DelegateBuilding
         private DelegateArgumentsBuilderFromNone()
         { }
 
-        public Expression[] Build(DelegateBuilderTypeCheck typeCheckOptions) =>
+        public Expression[] Build() =>
             Array.Empty<Expression>();
     }
 }

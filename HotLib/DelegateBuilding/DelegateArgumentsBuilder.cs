@@ -2,6 +2,8 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
+using HotLib.DotNetExtensions;
+
 namespace HotLib.DelegateBuilding
 {
     public abstract class DelegateArgumentsBuilder<TSource> : IDelegateArgumentsBuilder
@@ -16,7 +18,7 @@ namespace HotLib.DelegateBuilding
             Sources = sources ?? throw new ArgumentNullException(nameof(sources));
         }
 
-        public Expression[] Build(DelegateBuilderTypeCheck typeCheckOptions)
+        public Expression[] Build()
         {
             var parameters = Method.GetParameters();
 
@@ -34,7 +36,7 @@ namespace HotLib.DelegateBuilding
                 argExprs[i] =
                     sourceExpr.Type == parameter.ParameterType ?
                     sourceExpr :
-                    BuildConvertExpression(source, sourceExpr, parameter, typeCheckOptions);
+                    BuildConvertExpression(source, sourceExpr, parameter);
             }
 
             return argExprs;
@@ -42,36 +44,18 @@ namespace HotLib.DelegateBuilding
 
         protected abstract Expression BuildExpressionFromSource(TSource source);
 
-        protected Expression BuildConvertExpression(TSource source, Expression sourceExpr, ParameterInfo parameter, DelegateBuilderTypeCheck typeCheckOptions)
+        protected Expression BuildConvertExpression(TSource source, Expression sourceExpr, ParameterInfo parameter)
         {
-            switch (typeCheckOptions)
-            {
-                case DelegateBuilderTypeCheck.AtCompileTime:
-                    {
-                        return parameter.ParameterType.IsAssignableFrom(sourceExpr.Type) ?
-                            Expression.Convert(sourceExpr, parameter.ParameterType) :
-                            throw GetIncompatibleTypeException(source, parameter);
-                    }
-                case DelegateBuilderTypeCheck.AtCallTime:
-                    {
-                        var exceptionLocalExpr = Expression.Parameter(typeof(InvalidCastException), "e");
-                        return Expression
-                            .TryCatch(
-                                Expression.Convert(sourceExpr, parameter.ParameterType),
-                                Expression.MakeCatchBlock(
-                                    type: typeof(InvalidCastException),
-                                    variable: exceptionLocalExpr,
-                                    body: ExpressionHelpers.Throw(
-                                        exceptionExpr: (object o, InvalidCastException e) =>
-                                            new IncompatibleArgumentTypeException(Method, parameter, o, e),
-                                        expr1: sourceExpr,
-                                        expr2: exceptionLocalExpr,
-                                        type: parameter.ParameterType),
-                                    filter: null));
-                    }
-                default:
-                    throw new InvalidOperationException();
-            }
+            var sourceType = sourceExpr.Type;
+            var parameterType = parameter.ParameterType;
+
+            if (sourceType == parameterType)
+                return sourceExpr;
+
+            if (sourceType == typeof(void) || !sourceType.CanCastTo(parameterType))
+                throw GetIncompatibleTypeException(source, parameter);
+
+            return Expression.Convert(sourceExpr, parameterType);
         }
 
         protected abstract Exception GetIncompatibleTypeException(TSource source, ParameterInfo parameter);
