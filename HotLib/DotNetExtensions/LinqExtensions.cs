@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -6,7 +7,7 @@ using System.Runtime.InteropServices;
 namespace HotLib.DotNetExtensions
 {
     /// <summary>
-    /// Contains public static extension methods for <see cref="IEnumerable{T}"/>.
+    /// Contains public static extension methods for <see cref="IEnumerable{T}"/> and <see cref="IEnumerator{T}"/>.
     /// </summary>
     public static class LinqExtensions
     {
@@ -495,6 +496,32 @@ namespace HotLib.DotNetExtensions
             enumerator.Dispose();
 
             return pointer;
+        }
+
+        /// <summary>
+        /// Calls <see cref="IEnumerator.MoveNext"/> on the given enumerator continuously until a value
+        /// is found that matches the given predicate, or there are no items remaining.
+        /// </summary>
+        /// <typeparam name="T">The type of item being enumerated.</typeparam>
+        /// <param name="enumerator">The enumerator to advance.</param>
+        /// <param name="predicate">The predicate filter items against.</param>
+        /// <returns><see langword="true"/> if an item matching the predicate is found, <see langword="false"/> if the enumerator hits the end.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerator"/> or <paramref name="predicate"/> is null.</exception>
+        public static bool MoveNext<T>(this IEnumerator<T> enumerator, Predicate<T> predicate)
+        {
+            if (enumerator is null)
+                throw new ArgumentNullException(nameof(enumerator));
+            if (predicate is null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            while (enumerator.MoveNext())
+            {
+                if (predicate(enumerator.Current))
+                    return true;
+            }
+
+            // No values left
+            return false;
         }
     }
 }
