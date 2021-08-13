@@ -118,7 +118,7 @@ namespace HotLib.DelegateBuilding
 
             var parameterExpressions =
                 InstanceExpression is ParameterExpression instanceParameterExpr ?
-                Enumerable.Repeat(instanceParameterExpr, 1).Concat(NonInstanceParameterExpressions) :
+                NonInstanceParameterExpressions.Prepend(instanceParameterExpr):
                 NonInstanceParameterExpressions;
 
             var argumentExpressions = Arguments.Build();
