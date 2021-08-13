@@ -11,23 +11,6 @@ namespace HotLib.DotNetExtensions
     public static class LinqExtensions
     {
         /// <summary>
-        /// Creates an enumerable of the given item and then performs <see cref="Enumerable.Union{TSource}(IEnumerable{TSource}, IEnumerable{TSource})"/>
-        /// and returns the result.
-        /// </summary>
-        /// <typeparam name="TSource">The type of item in the enumerable.</typeparam>
-        /// <param name="enumerable">The enumerable to union the item into.</param>
-        /// <param name="item">The item to union with the enumerable.</param>
-        /// <returns>The result of the union.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
-        public static IEnumerable<TSource> Union<TSource>(this IEnumerable<TSource> enumerable, TSource item)
-        {
-            if (enumerable == null)
-                throw new ArgumentNullException(nameof(enumerable));
-            var itemEnumerable = Enumerable.Repeat(item, 1);
-            return enumerable.Union(itemEnumerable);
-        }
-
-        /// <summary>
         /// Performs an aggregator function which combines all elements in the enumerable to return a single value.
         /// </summary>
         /// <typeparam name="T">The type of value in the enumerable.</typeparam>
