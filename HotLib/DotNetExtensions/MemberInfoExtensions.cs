@@ -106,7 +106,7 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentException"><paramref name="member"/> is a non-auto property with no setter.</exception>
         /// <exception cref="ArgumentException"><paramref name="member"/> is not a field or property.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="member"/> or <paramref name="target"/> is null.</exception>
-        public static void SetFieldOrPropertyValue(this MemberInfo member, object target, object value)
+        public static void SetFieldOrPropertyValue(this MemberInfo member, object target, object? value)
         {
             if (member == null)
                 throw new ArgumentNullException(nameof(member));

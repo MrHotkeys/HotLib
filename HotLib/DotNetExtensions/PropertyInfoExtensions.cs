@@ -73,7 +73,7 @@ namespace HotLib.DotNetExtensions
         ///     -or-<paramref name="property"/> is a non-auto property with no setter.
         ///     -or-<paramref name="property"/> cannot be assigned from <paramref name="value"/> by type.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="property"/> is null.</exception>
-        public static void SetValue(this PropertyInfo property, object target, object value, bool useBackingFieldIfNoSetter)
+        public static void SetValue(this PropertyInfo property, object target, object? value, bool useBackingFieldIfNoSetter)
         {
             if (property is null)
                 throw new ArgumentNullException(nameof(property));
