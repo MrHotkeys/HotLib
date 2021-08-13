@@ -44,73 +44,90 @@ namespace HotLib.DotNetExtensions
             return enumerator.MoveNext() && !enumerator.MoveNext();
         }
 
-        /// <summary>
-        /// Tries to get the single element from the enumerable.
-        /// </summary>
-        /// <typeparam name="T">The type of the values in the enumerable.</typeparam>
-        /// <param name="enumerable">The enumerable to check.</param>
-        /// <param name="single">Will be set to the single item from the enumerable, or the default
-        ///     value for <typeparamref name="T"/> if no items or too many items.</param>
-        /// <returns>True if there is a single element, false if there are 0 or 2+ elements.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
-        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, out T? single)
-        {
-            if (enumerable == null)
-                throw new ArgumentNullException(nameof(enumerable));
+        /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool)"/>
+        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, out T? value) =>
+            TryGetSingle(enumerable, out value, out _, false);
 
-            var enumerator = enumerable.GetEnumerator();
-            if (enumerator.MoveNext())
-            {
-                var first = enumerator.Current;
-                if (!enumerator.MoveNext())
-                {
-                    single = first;
-                    enumerator.Dispose();
-                    return true;
-                }
-            }
-
-            single = default;
-            return false;
-        }
+        /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool)"/>
+        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, out T? value, out int count) =>
+            TryGetSingle(enumerable, out value, out count, true);
 
         /// <summary>
-        /// Tries to get the single element from the enumerable.
-        /// If there are no elements, the default value for <typeparamref name="T"/> is returned.
+        /// Attempts to get a single item from the given enumerable.
         /// </summary>
-        /// <typeparam name="T">The type of the values in the enumerable.</typeparam>
-        /// <param name="enumerable">The enumerable to check.</param>
-        /// <param name="single">Will be set to the single item from the enumerable, or the default
-        ///     value for <typeparamref name="T"/> if no items or too many items.</param>
-        /// <returns>True if there is a single element, false if there are 0 or 2+ elements.</returns>
+        /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool, Predicate{T})"/>
+        private static bool TryGetSingle<T>(IEnumerable<T> enumerable, out T? value, out int count, bool countAll) =>
+            TryGetSingle(enumerable, t => true, out value, out count, countAll);
+
+        /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool, Predicate{T})"/>
+        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, Predicate<T> predicate, out T? value) =>
+            TryGetSingle(enumerable, predicate, out value, out _, false);
+
+        /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool, Predicate{T})"/>
+        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, Predicate<T> predicate, out T? value, out int count) =>
+            TryGetSingle(enumerable, predicate, out value, out count, true);
+
+        /// <summary>
+        /// Attempts to get a single item from the given enumerable that meets the given predicate.
+        /// </summary>
+        /// <typeparam name="T">The type of item in the enumerable.</typeparam>
+        /// <param name="enumerable">The enumerable to search through.</param>
+        /// <param name="predicate">The predicate to filter items against.</param>
+        /// <param name="value">
+        ///     Will be set based on the number of items in the enumerable:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <term>1 Item</term><description>The single item in the enumerable.</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>0 Items</term><description>The default value for <typeparamref name="T"/>.</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>2+ Items</term><description>The first item in the enumerable.</description>
+        ///         </item>
+        ///     </list>
+        /// </param>
+        /// <param name="count">Will be set to the number of matches found.</param>
+        /// <param name="countAll">Whether or not to count all items when multiple found, or immediately return.
+        ///     Intended for overloads which don't produce the count.</param>
         /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
-        public static bool TryGetSingleOrDefault<T>(this IEnumerable<T> enumerable, out T? single)
+        private static bool TryGetSingle<T>(IEnumerable<T> enumerable, Predicate<T> predicate, out T? value, out int count, bool countAll)
         {
-            if (enumerable == null)
+            if (enumerable is null)
                 throw new ArgumentNullException(nameof(enumerable));
+            if (predicate is null)
+                throw new ArgumentNullException(nameof(predicate));
 
-            var enumerator = enumerable.GetEnumerator();
-            if (enumerator.MoveNext())
+            using var enumerator = enumerable.GetEnumerator();
+
+            // Check if no values
+            if (!enumerator.MoveNext(predicate))
             {
-                var first = enumerator.Current;
-                if (!enumerator.MoveNext())
-                {
-                    single = first;
-                    enumerator.Dispose();
-                    return true;
-                }
-                else
-                {
-                    single = default;
-                    return false;
-                }
-            }
-            else
-            {
-                single = default;
-                return true;
+                count = 0;
+                value = default;
+                return false;
             }
 
+            value = enumerator.Current;
+            count = 1;
+
+            // Check if multiple values
+            if (enumerator.MoveNext(predicate))
+            {
+                if (countAll)
+                {
+                    // Count exactly how many values
+                    do
+                    {
+                        count++;
+                    }
+                    while (enumerator.MoveNext(predicate));
+                }
+
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -122,24 +139,8 @@ namespace HotLib.DotNetExtensions
         ///     value for <typeparamref name="T"/> if no items.</param>
         /// <returns>True if there is at least one element, false if there are 0 elements.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
-        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, out T? first)
-        {
-            if (enumerable == null)
-                throw new ArgumentNullException(nameof(enumerable));
-
-            var enumerator = enumerable.GetEnumerator();
-            if (enumerator.MoveNext())
-            {
-                first = enumerator.Current;
-                enumerator.Dispose();
-                return true;
-            }
-            else
-            {
-                first = default;
-                return false;
-            }
-        }
+        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, out T? first) =>
+            TryGetSingle(enumerable, out first, out var count, false) || count > 0;
 
         /// <summary>
         /// Filters out the first item in the enumerable that matches the predicate, and yield returns the rest, in order.
