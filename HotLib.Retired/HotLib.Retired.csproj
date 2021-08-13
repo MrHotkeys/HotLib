@@ -11,9 +11,4 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Folder Include="Bits\" />
-  </ItemGroup>
-
 </Project>
