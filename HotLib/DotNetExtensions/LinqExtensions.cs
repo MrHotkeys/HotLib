@@ -221,7 +221,24 @@ namespace HotLib.DotNetExtensions
         }
 
         /// <summary>
-        /// Applies a projection function over the list, allowing each item to be processed with the knowledge of its corresponding index in the list.
+        /// Selects a tuple of every item in the list paired with its respective index in the list.
+        /// </summary>
+        /// <remarks>The list is processed in order from beginning (index 0) to end.</remarks>
+        /// <typeparam name="T">The type of item in the list.</typeparam>
+        /// <param name="list">The list of items to enumerate.</param>
+        /// <returns>The enumerable of projected values as results of the projection function, in the order the original items appeared in the list.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="list"/> is null.</exception>
+        public static IEnumerable<(int Index, T Item)> SelectWithIndex<T>(this IList<T> list)
+        {
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+
+            for (var i = 0; i < list.Count; i++)
+                yield return (i, list[i]);
+        }
+
+        /// <summary>
+        /// Selects a tuple of every item in the list paired with its respective index in the list, and applies a projection function to each tuple.
         /// </summary>
         /// <remarks>The list is processed in order from beginning (index 0) to end.</remarks>
         /// <typeparam name="T">The type of item in the list.</typeparam>
@@ -231,36 +248,11 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentNullException"><paramref name="list"/> or <paramref name="projection"/> is null.</exception>
         public static IEnumerable<TProjected> SelectWithIndex<T, TProjected>(this IList<T> list, Func<(int Index, T Item), TProjected> projection)
         {
-            if (list == null)
-                throw new ArgumentNullException(nameof(list));
             if (projection == null)
                 throw new ArgumentNullException(nameof(projection));
 
-            for (var i = 0; i < list.Count; i++)
-            {
-                var tuple = (i, list[i]);
+            foreach (var tuple in SelectWithIndex(list))
                 yield return projection(tuple);
-            }
-        }
-
-        /// <summary>
-        /// Gets an enumerable of <see cref="ValueTuple"/> of each item in the enumerable and an index as
-        /// provided by the given index selector. Does not enforce distinctness among the indices.
-        /// </summary>
-        /// <typeparam name="T">The type of item in the enumerable.</typeparam>
-        /// <param name="items">The enumerable of items to select with indices.</param>
-        /// <param name="indexSelector">Retrieves the appropriate index for the given item.</param>
-        /// <returns>An enumerable of <see cref="ValueTuple"/> of all items from the enumerable and their indices.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="items"/> or <paramref name="indexSelector"/> is null.</exception>
-        public static IEnumerable<(int index, T value)> WithIndex<T>(this IEnumerable<T> items, Func<T, int> indexSelector)
-        {
-            if (items == null)
-                throw new ArgumentNullException(nameof(items));
-            if (indexSelector == null)
-                throw new ArgumentNullException(nameof(indexSelector));
-
-            foreach (var value in items)
-                yield return (indexSelector(value), value);
         }
 
         /// <summary>
@@ -320,13 +312,13 @@ namespace HotLib.DotNetExtensions
 
             if (items.Any())
             {
-                var itemTuples = items.WithIndex(indexSelector)
-                                      .OrderBy(tuple => tuple.index);
+                var itemTuples = items.Select(i => (Index: indexSelector(i), Item: i))
+                                      .OrderBy(tuple => tuple.Index);
 
                 if (itemTuples.HasAtLeast(2))
                     ensureUniqueIndices(itemTuples);
 
-                var highestIndex = itemTuples.Max(tuple => tuple.index);
+                var highestIndex = itemTuples.Max(tuple => tuple.Index);
                 var array = new T[highestIndex + 1];
 
                 fillArray(itemTuples, array);
@@ -355,7 +347,7 @@ namespace HotLib.DotNetExtensions
                 }
             }
 
-            void fillArray(IEnumerable<(int index, T value)> orderedItemTuples, T[] array)
+            void fillArray(IEnumerable<(int Index, T Value)> orderedItemTuples, T[] array)
             {
                 var current = orderedItemTuples.First();
                 var tuplesLeft = orderedItemTuples.Skip(1);
@@ -363,11 +355,11 @@ namespace HotLib.DotNetExtensions
                 {
                     if (index == array.Length - 1)
                     {
-                        array[index] = current.value;
+                        array[index] = current.Value;
                     }
-                    else if (current.index == index)
+                    else if (current.Index == index)
                     {
-                        array[index] = current.value;
+                        array[index] = current.Value;
                         current = tuplesLeft.First();
                         tuplesLeft = tuplesLeft.Skip(1);
                     }
