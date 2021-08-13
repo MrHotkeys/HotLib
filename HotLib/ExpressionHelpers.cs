@@ -68,7 +68,7 @@ namespace HotLib
         /// <param name="type">The type to set the throw expresion as.</param>
         /// <returns>The created throw expression.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="exceptionExpr"/>, <paramref name="expr"/> is null. </exception>
-        public static Expression Throw<TExpr, TException>(Expression<Func<TExpr, TException>> exceptionExpr, Expression expr) =>
+        public static Expression Throw<T, TException>(Expression<Func<T, TException>> exceptionExpr, Expression expr) =>
             Throw(exceptionExpr, expr, exceptionExpr?.Type ?? typeof(void));
 
         /// <summary>
