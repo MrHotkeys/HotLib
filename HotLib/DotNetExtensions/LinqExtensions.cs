@@ -45,6 +45,69 @@ namespace HotLib.DotNetExtensions
             return enumerator.MoveNext() && !enumerator.MoveNext();
         }
 
+        /// <summary>
+        /// Returns the only item in the sequence, and throws an exception if no items or multiple
+        /// items are found, as provided by the given exception factory delegates.
+        /// </summary>
+        /// <inheritdoc cref="Single{T}(IEnumerable{T}, Predicate{T}, Func{IEnumerable{T}, Exception?}?, Func{IEnumerable{T}, int, Exception?}?)"/>
+        public static T? Single<T>(
+                this IEnumerable<T> enumerable,
+                Func<IEnumerable<T>, Exception?>? none = null,
+                Func<IEnumerable<T>, int, Exception?>? multiple = null) =>
+            Single(enumerable, t => true, none, multiple);
+
+        /// <summary>
+        /// Returns the only item in the sequence that satisfies a condition, and throws an exception if no
+        /// items or multiple items are found, as provided by the given exception factory delegates.
+        /// </summary>
+        /// <typeparam name="T">The type of item in the enumerable.</typeparam>
+        /// <param name="enumerable">The enumerable to get a single item from.</param>
+        /// <param name="predicate">The condition the single item in the list must meet.</param>
+        /// <param name="none">The exception factory that will be called when no items are found. Will
+        ///     be given the enumerable as an argument, to help avoid closures. Can be null or return null, in
+        ///     which case no exception will be thrown when there are no items.</param>
+        /// <param name="multiple">The exception factory that will be called when multiple items are found.
+        ///     Will be given the enumerable and total count of items as an argument, to help avoid closures. Can be
+        ///     null or return null, in which case no exception will be thrown when there are multiple items.</param>
+        /// <returns>The single item from the sequence, or the default value for <typeparamref name="T"/> if <paramref name="none"/>
+        ///     or <paramref name="multiple"/> is null and the corresponding condition occurs.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> or <paramref name="predicate"/> is null.</exception>
+        public static T? Single<T>(
+                this IEnumerable<T> enumerable,
+                Predicate<T> predicate,
+                Func<IEnumerable<T>, Exception?>? none = null,
+                Func<IEnumerable<T>, int, Exception?>? multiple = null)
+        {
+            if (enumerable is null)
+                throw new ArgumentNullException(nameof(enumerable));
+            if (predicate is null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            if (enumerable.TryGetSingle(predicate, out var result, out var count))
+            {
+                return result;
+            }
+            else
+            {
+                if (count == 0)
+                {
+                    var exception = none?.Invoke(enumerable);
+                    if (none is not null && exception is not null)
+                        throw exception;
+                    else
+                        return default;
+                }
+                else // Multiple
+                {
+                    var exception = multiple?.Invoke(enumerable, count);
+                    if (none is not null && exception is not null)
+                        throw exception;
+                    else
+                        return default;
+                }
+            }
+        }
+
         /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool)"/>
         public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, [NotNullWhen(true)] out T? value) =>
             TryGetSingle(enumerable, out value, out _, false);
