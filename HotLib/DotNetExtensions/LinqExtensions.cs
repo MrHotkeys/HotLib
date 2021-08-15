@@ -109,26 +109,26 @@ namespace HotLib.DotNetExtensions
         }
 
         /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool)"/>
-        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, [NotNullWhen(true)] out T? value) =>
+        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, [MaybeNullWhen(false)] out T value) =>
             TryGetSingle(enumerable, out value, out _, false);
 
         /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool)"/>
-        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, [NotNullWhen(true)] out T? value, out int count) =>
+        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, [MaybeNullWhen(false)] out T value, out int count) =>
             TryGetSingle(enumerable, out value, out count, true);
 
         /// <summary>
         /// Attempts to get a single item from the given enumerable.
         /// </summary>
-        /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool, Predicate{T})"/>
-        private static bool TryGetSingle<T>(IEnumerable<T> enumerable, [NotNullWhen(true)] out T? value, out int count, bool countAll) =>
+        /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, Predicate{T}, out T, out int, bool)"/>
+        private static bool TryGetSingle<T>(IEnumerable<T> enumerable, [MaybeNullWhen(false)] out T value, out int count, bool countAll) =>
             TryGetSingle(enumerable, t => true, out value, out count, countAll);
 
-        /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool, Predicate{T})"/>
-        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, Predicate<T> predicate, [NotNullWhen(true)] out T? value) =>
+        /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, Predicate{T}, out T, out int, bool)"/>
+        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, Predicate<T> predicate, [MaybeNullWhen(false)] out T value) =>
             TryGetSingle(enumerable, predicate, out value, out _, false);
 
-        /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool, Predicate{T})"/>
-        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, Predicate<T> predicate, [NotNullWhen(true)] out T? value, out int count) =>
+        /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, Predicate{T}, out T, out int, bool)"/>
+        public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, Predicate<T> predicate, [MaybeNullWhen(false)] out T value, out int count) =>
             TryGetSingle(enumerable, predicate, out value, out count, true);
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace HotLib.DotNetExtensions
         /// <param name="countAll">Whether or not to count all items when multiple found, or immediately return.
         ///     Intended for overloads which don't produce the count.</param>
         /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
-        private static bool TryGetSingle<T>(IEnumerable<T> enumerable, Predicate<T> predicate, [NotNullWhen(true)] out T? value, out int count, bool countAll)
+        private static bool TryGetSingle<T>(IEnumerable<T> enumerable, Predicate<T> predicate, [MaybeNullWhen(false)] out T value, out int count, bool countAll)
         {
             if (enumerable is null)
                 throw new ArgumentNullException(nameof(enumerable));
