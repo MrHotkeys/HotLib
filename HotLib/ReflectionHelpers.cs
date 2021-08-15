@@ -2,6 +2,8 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
+using HotLib.Expressions;
+
 namespace HotLib
 {
     public static class ReflectionHelpers

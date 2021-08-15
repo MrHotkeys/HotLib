@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace HotLib
+namespace HotLib.Expressions
 {
     public static class ExpressionHelpers
     {
@@ -313,6 +314,121 @@ namespace HotLib
                 }
             }
         }
-    }
 
+        public static Expression GetConditionalNullExpression(Expression checkExpr, Expression ifNonNullExpr, Expression ifNullExpr)
+        {
+            if (!checkExpr.Type.IsClass && !checkExpr.Type.IsInterface && Nullable.GetUnderlyingType(checkExpr.Type) == null)
+                return ifNonNullExpr; // Can't be null, no check needed
+
+            return Expression.Condition(
+                test: Expression.Equal(
+                    left: checkExpr,
+                    right: Expression.Constant(null, checkExpr.Type)),
+                ifTrue: ifNullExpr,
+                ifFalse: ifNonNullExpr);
+        }
+
+        public static Expression GetConditionalNullExpression<TException>(Expression checkExpr, Expression ifNonNullExpr, Expression<Func<TException>> newExceptionExpr)
+            where TException : Exception
+        {
+            return GetConditionalNullExpression(
+                checkExpr: checkExpr,
+                ifNonNullExpr: ifNonNullExpr,
+                ifNullExpr: Throw(newExceptionExpr, ifNonNullExpr.Type));
+        }
+
+        public static bool TryMakeConvert(Expression expr, Type type, [NotNullWhen(true)] out UnaryExpression? convertedExpr)
+        {
+            try
+            {
+                convertedExpr = Expression.Convert(expr, type);
+                return true;
+            }
+            catch (InvalidOperationException)
+            {
+                convertedExpr = default;
+                return false;
+            }
+        }
+
+        public static Expression CaptureBody(Expression<Action> expr)
+        {
+            if (expr is null)
+                throw new ArgumentNullException(nameof(expr));
+
+            return expr.Body;
+        }
+
+        public static Expression CaptureBody<T>(Expression<Func<T>> expr)
+        {
+            if (expr is null)
+                throw new ArgumentNullException(nameof(expr));
+
+            return expr.Body;
+        }
+
+        public static Expression<Action> Capture(Expression<Action> expr)
+        {
+            if (expr is null)
+                throw new ArgumentNullException(nameof(expr));
+
+            return expr;
+        }
+
+        public static Expression<Action<T>> Capture<T>(Expression<Action<T>> expr)
+        {
+            if (expr is null)
+                throw new ArgumentNullException(nameof(expr));
+
+            return expr;
+        }
+
+        public static Expression<Action<T1, T2>> Capture<T1, T2>(Expression<Action<T1, T2>> expr)
+        {
+            if (expr is null)
+                throw new ArgumentNullException(nameof(expr));
+
+            return expr;
+        }
+
+        public static Expression<Action<T1, T2, T3>> Capture<T1, T2, T3>(Expression<Action<T1, T2, T3>> expr)
+        {
+            if (expr is null)
+                throw new ArgumentNullException(nameof(expr));
+
+            return expr;
+        }
+
+        public static Expression<Func<TOut>> Capture<TOut>(Expression<Func<TOut>> expr)
+        {
+            if (expr is null)
+                throw new ArgumentNullException(nameof(expr));
+
+            return expr;
+        }
+
+        public static Expression<Func<T, TOut>> Capture<T, TOut>(Expression<Func<T, TOut>> expr)
+        {
+            if (expr is null)
+                throw new ArgumentNullException(nameof(expr));
+
+            return expr;
+        }
+
+        public static Expression<Func<T1, T2, TOut>> Capture<T1, T2, TOut>(Expression<Func<T1, T2, TOut>> expr)
+        {
+            if (expr is null)
+                throw new ArgumentNullException(nameof(expr));
+
+            return expr;
+        }
+
+        public static Expression<Func<T1, T2, T3, TOut>> Capture<T1, T2, T3, TOut>(Expression<Func<T1, T2, T3, TOut>> expr)
+        {
+            if (expr is null)
+                throw new ArgumentNullException(nameof(expr));
+
+            return expr;
+        }
+    }
 }

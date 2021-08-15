@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 using HotLib.DotNetExtensions;
 
-namespace HotLib
+namespace HotLib.Expressions
 {
     /// <summary>
     /// An <see cref="ExpressionVisitor"/> implementation which invokes a given callback function

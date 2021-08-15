@@ -53,13 +53,19 @@ namespace HotLib.DotNetExtensions
         /// <param name="type">The type to check.</param>
         /// <returns>True if can be set to null, false if not.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="type"/> is null.</exception>
-        public static bool CanBeSetToNull(this Type type)
-        {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+        public static bool CanBeSetToNull(this Type type) =>
+            type is null ? throw new ArgumentNullException(nameof(type)) :
+            type.IsClass || IsNullableValueType(type);
 
-            return type.IsClass || Nullable.GetUnderlyingType(type) != null;
-        }
+        /// <summary>
+        /// Gets if the type is <see cref="Nullable{T}"/>.
+        /// </summary>
+        /// <param name="type">The type to check.</param>
+        /// <returns>True if the type is <see cref="Nullable{T}"/>, false if not.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/> is null.</exception>
+        public static bool IsNullableValueType(this Type type) =>
+            type is null ? throw new ArgumentNullException(nameof(type)) :
+            Nullable.GetUnderlyingType(type) != null;
 
         /// <summary>
         /// Gets whether the <see cref="Type"/> implements an interface or any interfaces that extend the interface.
