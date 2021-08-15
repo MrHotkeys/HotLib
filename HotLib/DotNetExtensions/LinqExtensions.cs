@@ -196,7 +196,7 @@ namespace HotLib.DotNetExtensions
             using var enumerator = enumerable.GetEnumerator();
 
             // Check if no values
-            if (!enumerator.MoveNext(predicate))
+            if (!enumerator.MoveNextUntil(predicate))
             {
                 count = 0;
                 value = default;
@@ -207,7 +207,7 @@ namespace HotLib.DotNetExtensions
             count = 1;
 
             // Check if multiple values
-            if (enumerator.MoveNext(predicate))
+            if (enumerator.MoveNextUntil(predicate))
             {
                 if (countAll)
                 {
@@ -216,7 +216,7 @@ namespace HotLib.DotNetExtensions
                     {
                         count++;
                     }
-                    while (enumerator.MoveNext(predicate));
+                    while (enumerator.MoveNextUntil(predicate));
                 }
 
                 return false;
@@ -667,7 +667,7 @@ namespace HotLib.DotNetExtensions
         /// <param name="predicate">The predicate filter items against.</param>
         /// <returns><see langword="true"/> if an item matching the predicate is found, <see langword="false"/> if the enumerator hits the end.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="enumerator"/> or <paramref name="predicate"/> is null.</exception>
-        public static bool MoveNext<T>(this IEnumerator<T> enumerator, Predicate<T> predicate)
+        public static bool MoveNextUntil<T>(this IEnumerator<T> enumerator, Predicate<T> predicate)
         {
             if (enumerator is null)
                 throw new ArgumentNullException(nameof(enumerator));
