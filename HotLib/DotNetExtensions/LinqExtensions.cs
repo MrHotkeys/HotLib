@@ -108,10 +108,12 @@ namespace HotLib.DotNetExtensions
             }
         }
 
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
         /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool)"/>
         public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, [MaybeNullWhen(false)] out T value) =>
             TryGetSingle(enumerable, out value, out _, false);
 
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
         /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool)"/>
         public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, [MaybeNullWhen(false)] out T value, out int count) =>
             TryGetSingle(enumerable, out value, out count, true);
@@ -119,6 +121,7 @@ namespace HotLib.DotNetExtensions
         /// <summary>
         /// Attempts to get a single item from the given enumerable.
         /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
         /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, Predicate{T}, out T, out int, bool)"/>
         private static bool TryGetSingle<T>(IEnumerable<T> enumerable, [MaybeNullWhen(false)] out T value, out int count, bool countAll) =>
             TryGetSingle(enumerable, t => true, out value, out count, countAll);
@@ -154,7 +157,7 @@ namespace HotLib.DotNetExtensions
         /// <param name="count">Will be set to the number of matches found.</param>
         /// <param name="countAll">Whether or not to count all items when multiple found, or immediately return.
         ///     Intended for overloads which don't produce the count.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> or <paramref name="predicate"/> is null.</exception>
         private static bool TryGetSingle<T>(IEnumerable<T> enumerable, Predicate<T> predicate, [MaybeNullWhen(false)] out T value, out int count, bool countAll)
         {
             if (enumerable is null)
