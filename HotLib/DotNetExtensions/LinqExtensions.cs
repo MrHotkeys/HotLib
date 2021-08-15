@@ -226,16 +226,80 @@ namespace HotLib.DotNetExtensions
         }
 
         /// <summary>
-        /// Tries to get the first element from the enumerable.
+        /// Returns the first item in the sequence, and throws an exception if no items are found,
+        /// as provided by the given exception factory delegate.
         /// </summary>
-        /// <typeparam name="T">The type of the values in the enumerable.</typeparam>
-        /// <param name="enumerable">The enumerable to check.</param>
-        /// <param name="first">Will be set to the first item from the enumerable, or the default
-        ///     value for <typeparamref name="T"/> if no items.</param>
-        /// <returns>True if there is at least one element, false if there are 0 elements.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
-        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, out T? first) =>
-            TryGetSingle(enumerable, out first, out var count, false) || count > 0;
+        /// <inheritdoc cref="First{T}(IEnumerable{T}, Predicate{T}, Func{IEnumerable{T}, Exception}?)"/>
+        [return: NotNullIfNotNull("none")]
+        public static T? First<T>(
+                this IEnumerable<T> enumerable,
+                Func<IEnumerable<T>, Exception>? none = null) =>
+            First(enumerable, t => true, none);
+
+        /// <summary>
+        /// Returns the first item in the sequence that satisfies a condition, and throws an exception if no
+        /// items are found, as provided by the given exception factory delegates.
+        /// </summary>
+        /// <typeparam name="T">The type of item in the sequence.</typeparam>
+        /// <param name="enumerable">The sequence of items to get the first item from.</param>
+        /// <param name="predicate">The condition the item in the list must meet.</param>
+        /// <param name="none">The exception factory that will be called when no items are found. Will
+        ///     be given the enumerable as an argument, to help avoid closures. Can be null, in
+        ///     which case no exception will be thrown when there are no items.</param>
+        /// <returns>The first item from the sequence, or the default value for <typeparamref name="T"/> if no
+        ///     items and <paramref name="none"/> is null.</returns>
+        /// <exception cref="InvalidOperationException">Condition for throwing an exception met but one of the exception
+        ///     factory delegates returned null instead of a throwable exception instance.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> or <paramref name="predicate"/> is null.</exception>
+        [return: NotNullIfNotNull("none")]
+        public static T? First<T>(
+                this IEnumerable<T> enumerable,
+                Predicate<T> predicate,
+                Func<IEnumerable<T>, Exception>? none = null)
+        {
+            if (enumerable is null)
+                throw new ArgumentNullException(nameof(enumerable));
+            if (predicate is null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            if (!enumerable.TryGetFirst(predicate, out var result) && none is not null)
+            {
+                throw none(enumerable) ??
+                    throw new InvalidOperationException($"No items found in {enumerable}, but exception factory delegate {nameof(none)} returned null!");
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Attempts to get the first item from the sequence.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
+        /// <inheritdoc cref="TryGetFirst{T}(IEnumerable{T}, Predicate{T}, out T)"/>
+        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, [MaybeNullWhen(false)] out T value) =>
+            TryGetFirst(enumerable, out value);
+
+        /// <summary>
+        /// Attempts to get the first item from the sequence that satisfies a condition.
+        /// </summary>
+        /// <typeparam name="T">The type of item in the sequence.</typeparam>
+        /// <param name="enumerable">The sequence of items to get the first item from.</param>
+        /// <param name="predicate">The predicate to filter items against.</param>
+        /// <param name="value">
+        ///     Will be set based on the number of items in the enumerable:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <term>1+ Items</term><description>The first item in the sequence.</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>0 Items</term><description>The default value for <typeparamref name="T"/>.</description>
+        ///         </item>
+        ///     </list>
+        /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> or <paramref name="predicate"/> is null.</exception>
+        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, Predicate<T> predicate, [MaybeNullWhen(false)] out T value) =>
+            TryGetSingle(enumerable, predicate, out value, out var count, false) || count > 0;
 
         /// <summary>
         /// Filters out the first item in the enumerable that matches the predicate, and yield returns the rest, in order.
