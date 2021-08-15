@@ -62,5 +62,42 @@ namespace HotLib.DotNetExtensions
             // If we got this far, it just goes at the end
             list.Add(item);
         }
+
+        /// <remarks>Uses <see cref="EqualityComparer{T}.Default"/> to compare keys.</remarks>
+        /// <inheritdoc cref="ToDictionaryOfIndices{T}(IList{T}, IEqualityComparer{T})"/>
+        public static Dictionary<T, int> ToDictionaryOfIndices<T>(this IList<T> list)
+            where T : notnull =>            
+            ToDictionaryOfIndices(list, EqualityComparer<T>.Default);
+
+        /// <summary>
+        /// Creates a dictionary where the keys are each item from the list, and the values are the respective indices in this list.
+        /// </summary>
+        /// <typeparam name="T">The type of item in the list.</typeparam>
+        /// <param name="list">The list to convert. Cannot contain null.</param>
+        /// <param name="keyComparer">The comparer to use for keys.</param>
+        /// <returns>The created dictionary.</returns>
+        /// <exception cref="ArgumentException"><paramref name="list"/> contains null.
+        ///     -or-The items in <paramref name="list"/> are not unique.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="list"/> or <paramref name="keyComparer"/> is null.</exception>
+        public static Dictionary<T, int> ToDictionaryOfIndices<T>(this IList<T> list, IEqualityComparer<T> keyComparer)
+            where T : notnull
+        {
+            if (list is null)
+                throw new ArgumentNullException(nameof(list));
+            if (keyComparer is null)
+                throw new ArgumentNullException(nameof(keyComparer));
+
+            var dictionary = new Dictionary<T, int>(list.Count, keyComparer);
+            for (var i = 0; i < list.Count; i++)
+            {
+                var item = list[i];
+                if (item is null)
+                    throw new ArgumentException($"Input list cannot contain null!", nameof(list));
+                if (!dictionary.TryAdd(item, i))
+                    throw new ArgumentException($"Found repeated item {item} - all items must be unique!", nameof(list));
+            }
+
+            return dictionary;
+        }
     }
 }
