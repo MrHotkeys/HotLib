@@ -147,7 +147,7 @@ namespace HotLib.DotNetExtensions
             TryGetSingle(enumerable, out value, out count, true);
 
         /// <summary>
-        /// Attempts to get a single item from the given enumerable.
+        /// Attempts to get a single item from the the sequence.
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
         /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, Predicate{T}, out T, out int, bool)"/>
@@ -163,22 +163,22 @@ namespace HotLib.DotNetExtensions
             TryGetSingle(enumerable, predicate, out value, out count, true);
 
         /// <summary>
-        /// Attempts to get a single item from the given enumerable that meets the given predicate.
+        /// Attempts to get a single item from the the sequence that satisfies a condition.
         /// </summary>
-        /// <typeparam name="T">The type of item in the enumerable.</typeparam>
-        /// <param name="enumerable">The enumerable to search through.</param>
+        /// <typeparam name="T">The type of item in the sequence.</typeparam>
+        /// <param name="enumerable">The sequence of items to get the single item from.</param>
         /// <param name="predicate">The predicate to filter items against.</param>
         /// <param name="value">
-        ///     Will be set based on the number of items in the enumerable:
+        ///     Will be set based on the number of items in the sequence:
         ///     <list type="bullet">
         ///         <item>
-        ///             <term>1 Item</term><description>The single item in the enumerable.</description>
+        ///             <term>1 Item</term><description>The single item in the sequence.</description>
         ///         </item>
         ///         <item>
         ///             <term>0 Items</term><description>The default value for <typeparamref name="T"/>.</description>
         ///         </item>
         ///         <item>
-        ///             <term>2+ Items</term><description>The first item in the enumerable.</description>
+        ///             <term>2+ Items</term><description>The first item in the sequence.</description>
         ///         </item>
         ///     </list>
         /// </param>
@@ -287,7 +287,7 @@ namespace HotLib.DotNetExtensions
         /// <param name="enumerable">The sequence of items to get the first item from.</param>
         /// <param name="predicate">The predicate to filter items against.</param>
         /// <param name="value">
-        ///     Will be set based on the number of items in the enumerable:
+        ///     Will be set based on the number of items in the sequence:
         ///     <list type="bullet">
         ///         <item>
         ///             <term>1+ Items</term><description>The first item in the sequence.</description>
