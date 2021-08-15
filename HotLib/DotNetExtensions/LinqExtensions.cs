@@ -108,6 +108,30 @@ namespace HotLib.DotNetExtensions
             }
         }
 
+        /// <summary>
+        /// Returns the only item in the sequence, the default for <typeparamref name="T"/> if no items,
+        /// or throws an exception if multiple items are found, as provided by the given exception factory delegate.
+        /// </summary>
+        /// <inheritdoc cref="Single"/>
+        public static T? SingleOrDefault<T>(
+                this IEnumerable<T> enumerable,
+                Func<IEnumerable<T>, int, Exception?>? multiple = null) =>
+            SingleOrDefault(enumerable, t => true, multiple);
+
+        /// <summary>
+        /// Returns the only item in the sequence that satisfies a condition, the default for <typeparamref name="T"/> if no items,
+        /// or throws an exception if multiple items are found, as provided by the given exception factory delegate.
+        /// </summary>
+        /// <returns>The single item from the sequence, or the default value for <typeparamref name="T"/> if there
+        ///     are no items in the sequence that satisfy the condition or <paramref name="multiple"/> is null and the
+        ///     corresponding condition occurs.</returns>
+        /// <inheritdoc cref="Single{T}(IEnumerable{T}, Predicate{T}, Func{IEnumerable{T}, Exception?}?, Func{IEnumerable{T}, int, Exception?}?)"/>
+        public static T? SingleOrDefault<T>(
+                this IEnumerable<T> enumerable,
+                Predicate<T> predicate,
+                Func<IEnumerable<T>, int, Exception?>? multiple = null) =>
+            Single(enumerable, predicate, null, multiple);
+
         /// <exception cref="ArgumentNullException"><paramref name="enumerable"/> is null.</exception>
         /// <inheritdoc cref="TryGetSingle{T}(IEnumerable{T}, out T, out int, bool)"/>
         public static bool TryGetSingle<T>(this IEnumerable<T> enumerable, [MaybeNullWhen(false)] out T value) =>
