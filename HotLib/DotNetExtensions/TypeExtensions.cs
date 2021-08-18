@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -64,8 +65,13 @@ namespace HotLib.DotNetExtensions
         /// <returns>True if the type is <see cref="Nullable{T}"/>, false if not.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="type"/> is null.</exception>
         public static bool IsNullableValueType(this Type type) =>
+            IsNullableValueType(type, out _);
+
+        /// <param name="underlyingType">If this type is <see cref="Nullable{T}"/>, will be set to the nullable's underlying type.</param>
+        /// <inheritdoc cref="IsNullableValueType(Type)"/>
+        public static bool IsNullableValueType(this Type type, [NotNullWhen(true)] out Type? underlyingType) =>
             type is null ? throw new ArgumentNullException(nameof(type)) :
-            Nullable.GetUnderlyingType(type) != null;
+            (underlyingType = Nullable.GetUnderlyingType(type)) != null;
 
         /// <summary>
         /// Gets whether the <see cref="Type"/> implements an interface or any interfaces that extend the interface.
