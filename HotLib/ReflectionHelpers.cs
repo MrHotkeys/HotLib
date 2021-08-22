@@ -164,7 +164,7 @@ namespace HotLib
         //    }
         //}
 
-        private static MemberInfo CaptureFieldOrProperty<TMember>(LambdaExpression getterExpr) =>
+        public static MemberInfo CaptureFieldOrProperty(LambdaExpression getterExpr) =>
             getterExpr is null ?
                 throw new ArgumentNullException(nameof(getterExpr)) :
             getterExpr.Body is not MemberExpression memberExpr ?
@@ -172,23 +172,23 @@ namespace HotLib
             memberExpr.Member;
 
         public static MemberInfo CaptureFieldOrProperty<TMember>(Expression<Func<TMember>> getterExpr) =>
-            CaptureFieldOrProperty<TMember>(getterExpr as LambdaExpression);
+            CaptureFieldOrProperty(getterExpr as LambdaExpression);
 
-        private static FieldInfo CaptureField<TField>(LambdaExpression getterExpr) =>
-            CaptureFieldOrProperty<TField>(getterExpr) is not FieldInfo field ?
+        public static FieldInfo CaptureField(LambdaExpression getterExpr) =>
+            CaptureFieldOrProperty(getterExpr) is not FieldInfo field ?
                 throw new ArgumentException("Must be a field access!", nameof(getterExpr)) :
             field;
 
         public static FieldInfo CaptureField<TField>(Expression<Func<TField>> getterExpr) =>
-            CaptureField<TField>(getterExpr as LambdaExpression);
+            CaptureField(getterExpr as LambdaExpression);
 
-        private static PropertyInfo CaptureProperty<TProperty>(LambdaExpression getterExpr) =>
-            CaptureFieldOrProperty<TProperty>(getterExpr) is not PropertyInfo property ?
+        public static PropertyInfo CaptureProperty(LambdaExpression getterExpr) =>
+            CaptureFieldOrProperty(getterExpr) is not PropertyInfo property ?
                 throw new ArgumentException("Must be a property access!", nameof(getterExpr)) :
             property;
 
         public static PropertyInfo CaptureProperty<TProperty>(Expression<Func<TProperty>> getterExpr) =>
-            CaptureProperty<TProperty>(getterExpr as LambdaExpression);
+            CaptureProperty(getterExpr as LambdaExpression);
 
         public static ConstructorInfo CaptureConstructor<TReturn>(Expression<Func<TReturn>> expr) =>
             expr is null ?
@@ -212,13 +212,13 @@ namespace HotLib
             { }
 
             public MemberInfo CaptureFieldOrProperty<TMember>(Expression<Func<TFrom, TMember>> getterExpr) =>
-                ReflectionHelpers.CaptureFieldOrProperty<TMember>(getterExpr);
+                ReflectionHelpers.CaptureFieldOrProperty(getterExpr);
 
             public FieldInfo CaptureField<TField>(Expression<Func<TFrom, TField>> getterExpr) =>
-                ReflectionHelpers.CaptureField<TField>(getterExpr);
+                ReflectionHelpers.CaptureField(getterExpr);
 
             public PropertyInfo CaptureProperty<TProperty>(Expression<Func<TFrom, TProperty>> getterExpr) =>
-                ReflectionHelpers.CaptureProperty<TProperty>(getterExpr);
+                ReflectionHelpers.CaptureProperty(getterExpr);
 
             /// <summary>
             /// Given a <see cref="LambdaExpression"/> whose body returns a method as a delegate (e.g. <c>x => x.ToString</c>, <b>not a method call</b>),
