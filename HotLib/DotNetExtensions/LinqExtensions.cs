@@ -683,5 +683,98 @@ namespace HotLib.DotNetExtensions
             // No values left
             return false;
         }
+
+        /// <inheritdoc cref="DumpToSpan{T}(IEnumerator{T})"/>
+        public static Span<object> DumpToSpan(this IEnumerator enumerator) =>
+            DumpToSpan(enumerator, false);
+
+        /// <inheritdoc cref="DumpToSpan{T}(IEnumerator{T}, bool)"/>
+        public static Span<object> DumpToSpan(this IEnumerator enumerator, bool includeCurrent)
+        {
+            if (enumerator is null)
+                throw new ArgumentNullException(nameof(enumerator));
+
+            var list = new List<object>();
+            var hasItems = includeCurrent || enumerator.MoveNext();
+            while (hasItems)
+            {
+                list.Add(enumerator.Current);
+                hasItems = enumerator.MoveNext();
+            }
+
+            return CollectionsMarshal.AsSpan(list);
+        }
+
+        /// <remarks><see cref="IEnumerator.MoveNext"/> will be called before dumping items,
+        ///     skipping past whatever is currently in <see cref="IEnumerator.Current"/>.</remarks>
+        /// <inheritdoc cref="DumpToSpan{T}(IEnumerator{T}, bool)"/>
+        public static Span<T> DumpToSpan<T>(this IEnumerator<T> enumerator) =>
+            DumpToSpan(enumerator, false);
+
+        /// <summary>
+        /// Dumps all items left to be enumerated to a span.
+        /// </summary>
+        /// <param name="enumerator">The enumerator to dump.</param>
+        /// <param name="includeCurrent">If <see langword="true"/>, the current item in the enumerator will be included.
+        ///     If <see langword="false"/>, <see cref="IEnumerator.MoveNext"/> will be called before dumping items.</param>
+        /// <returns>The span containing all items. Will have the same size as the number of
+        ///     items remaining in the enumerator.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerator"/> is null.</exception>
+        public static Span<T> DumpToSpan<T>(this IEnumerator<T> enumerator, bool includeCurrent)
+        {
+            var list = new List<T>();
+            var hasItems = includeCurrent || enumerator.MoveNext();
+            while (hasItems)
+            {
+                list.Add(enumerator.Current);
+                hasItems = enumerator.MoveNext();
+            }
+
+            return CollectionsMarshal.AsSpan(list);
+        }
+
+        /// <inheritdoc cref="DumpToArray{T}(IEnumerator{T})"/>
+        public static object[] DumpToArray(this IEnumerator enumerator) =>
+            DumpToArray(enumerator, false);
+
+        /// <inheritdoc cref="DumpToArray{T}(IEnumerator{T}, bool)"/>
+        public static object[] DumpToArray(this IEnumerator enumerator, bool includeCurrent)
+        {
+            var span = DumpToSpan(enumerator, includeCurrent);
+
+            var arr = new object[span.Length];
+            var arrSpan = arr.AsSpan();
+
+            span.CopyTo(arrSpan);
+
+            return arr;
+        }
+
+        /// <remarks><see cref="IEnumerator.MoveNext"/> will be called before dumping items,
+        ///     skipping past whatever is currently in <see cref="IEnumerator.Current"/>.</remarks>
+        /// <inheritdoc cref="DumpToArray{T}(IEnumerator{T}, bool)"/>
+        public static T[] DumpToArray<T>(this IEnumerator<T> enumerator) =>
+            DumpToArray(enumerator, false);
+
+        /// <summary>
+        /// Dumps all items left to be enumerated to an array.
+        /// </summary>
+        /// <param name="enumerator">The enumerator to dump.</param>
+        /// <param name="includeCurrent">If <see langword="true"/>, the current item in the enumerator will be included.
+        ///     If <see langword="false"/>, <see cref="IEnumerator.MoveNext"/> will be called before dumping items.</param>
+        /// <returns>The array containing all items. Will have the same size as the number of
+        ///     items remaining in the enumerator.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="enumerator"/> is null.</exception>
+        public static T[] DumpToArray<T>(this IEnumerator<T> enumerator, bool includeCurrent)
+        {
+            var span = DumpToSpan(enumerator, includeCurrent);
+
+            var arr = new T[span.Length];
+            var arrSpan = arr.AsSpan();
+
+            span.CopyTo(arrSpan);
+
+            return arr;
+        }
     }
 }
