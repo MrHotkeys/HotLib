@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.31402.337
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotLib", "HotLib\HotLib.csproj", "{CCFE8B7C-BFF6-4221-866D-8EB06784C8AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotLib.Retired", "HotLib.Retired\HotLib.Retired.csproj", "{29322AA6-EF83-460F-8AD1-816CA6CC2E1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotLib.Retired", "HotLib.Retired\HotLib.Retired.csproj", "{29322AA6-EF83-460F-8AD1-816CA6CC2E1E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotLib.Testing", "HotLib.Testing\HotLib.Testing.csproj", "{7C6A3952-D319-4D40-B779-05CBE463E162}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{29322AA6-EF83-460F-8AD1-816CA6CC2E1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29322AA6-EF83-460F-8AD1-816CA6CC2E1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29322AA6-EF83-460F-8AD1-816CA6CC2E1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C6A3952-D319-4D40-B779-05CBE463E162}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C6A3952-D319-4D40-B779-05CBE463E162}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C6A3952-D319-4D40-B779-05CBE463E162}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C6A3952-D319-4D40-B779-05CBE463E162}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
