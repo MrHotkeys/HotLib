@@ -325,7 +325,7 @@ namespace HotLib.DotNetExtensions
             if (from.IsAssignableTo(to))
                 return true;
 
-            if ((from.IsPrimitive || from.IsEnum) && (to.IsPrimitive && to.IsEnum))
+            if ((from.IsPrimitive || from.IsEnum) && (to.IsPrimitive || to.IsEnum))
             {
                 // All primitives (except bool) can be explicitly cast to each other (narrowing)
                 if (!implicitOnly)
