@@ -16,19 +16,6 @@ namespace HotLib
             public T Of<T>() => throw new InvalidOperationException();
         }
 
-        public static Type GetFieldOrPropertyType(this MemberInfo member)
-        {
-            if (member is null)
-                throw new ArgumentNullException(nameof(member));
-
-            return member.MemberType switch
-            {
-                MemberTypes.Field => (member as FieldInfo)!.FieldType,
-                MemberTypes.Property => (member as PropertyInfo)!.PropertyType,
-                _ => throw new InvalidOperationException(),
-            };
-        }
-
         public static Action<TTarget, TField> BuildSetter<TTarget, TField>(FieldInfo field)
         {
             // TODO: Make sure the field belongs to TTarget

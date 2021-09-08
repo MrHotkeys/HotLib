@@ -57,18 +57,15 @@ namespace HotLib.DotNetExtensions
         /// <exception cref="ArgumentNullException"><paramref name="member"/> is null.</exception>
         public static Type GetFieldOrPropertyType(this MemberInfo member)
         {
-            if (member == null)
+            if (member is null)
                 throw new ArgumentNullException(nameof(member));
 
-            switch (member)
+            return member.MemberType switch
             {
-                case FieldInfo fieldInfo:
-                    return fieldInfo.FieldType;
-                case PropertyInfo propertyInfo:
-                    return propertyInfo.PropertyType;
-                default:
-                    throw new ArgumentException("This only works when the member is a field or property!");
-            }
+                MemberTypes.Field => (member as FieldInfo)!.FieldType,
+                MemberTypes.Property => (member as PropertyInfo)!.PropertyType,
+                _ => throw new ArgumentException("This only works when the member is a field or property!"),
+            };
         }
 
         /// <summary>
