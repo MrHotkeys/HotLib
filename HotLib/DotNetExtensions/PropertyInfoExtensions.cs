@@ -71,16 +71,26 @@ namespace HotLib.DotNetExtensions
         /// <param name="useBackingFieldIfNoSetter">If true and the property has no setter, its backing field will be set if it is an auto-property.</param>
         /// <exception cref="ArgumentException"><paramref name="target"/> is null but <paramref name="property"/> is non-static.
         ///     -or-<paramref name="property"/> is a non-auto property with no setter.
-        ///     -or-<paramref name="property"/> cannot be assigned from <paramref name="value"/> by type.</exception>
+        ///     -or-<paramref name="property"/> cannot be assigned from <paramref name="value"/> by type.
+        ///     -or-<paramref name="value"/> is null but <paramref name="property"/> cannot be set to null.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="property"/> is null.</exception>
         public static void SetValue(this PropertyInfo property, object target, object? value, bool useBackingFieldIfNoSetter)
         {
             if (property is null)
                 throw new ArgumentNullException(nameof(property));
             if (target is null && !property.IsStatic())
-                throw new ArgumentException($"{nameof(target)} cannot be null: {property} is non-static!");
-            if (!property.PropertyType.IsAssignableFrom(value.GetType()))
-                throw new ArgumentException($"Cannot set {property} with value of type {value.GetType()}!");
+                throw new ArgumentException($"{nameof(target)} cannot be null: property {property} is non-static!", nameof(target));
+            
+            if (value is null)
+            {
+                if (!property.PropertyType.CanBeSetToNull())
+                    throw new ArgumentException($"Cannot set non-nullable property {property} to null!", nameof(value));
+            }
+            else
+            {
+                if (!property.PropertyType.IsAssignableFrom(value.GetType()))
+                    throw new ArgumentException($"Cannot set property {property} with value of type {value.GetType()}!", nameof(value));
+            }
 
             EnsurePropertyIsAsDeclared(ref property, target);
 
@@ -88,7 +98,7 @@ namespace HotLib.DotNetExtensions
 
             if (setter != null)
             {
-                setter.Invoke(target, new object[] { value });
+                setter.Invoke(target, new object?[] { value });
             }
             else if (useBackingFieldIfNoSetter)
             {
@@ -97,11 +107,11 @@ namespace HotLib.DotNetExtensions
                 if (backingField != null)
                     backingField.SetValue(target, value);
                 else
-                    throw new ArgumentException($"Could not locate setter or backing field for member {property.DeclaringType}.{property.Name}!");
+                    throw new ArgumentException($"Could not locate setter or backing field for property {property}!", nameof(property));
             }
             else
             {
-                throw new ArgumentException($"{property.DeclaringType}.{property.Name} has no setter!");
+                throw new ArgumentException($"{property.DeclaringType}.{property.Name} has no setter!", nameof(property));
             }
         }
 
